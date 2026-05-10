@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d8044d8d6b4eab1458215f5086007e55, type: 3}
-  m_Name: Item_key
+  m_Name: lens
   m_EditorClassIdentifier: 
-  itemId: item_key
-  itemName: Key
-  icon: {fileID: 21300000, guid: 459db042e56974941b20306b7cf0282d, type: 3}
+  itemId: lens
+  itemName: Lens
+  icon: {fileID: 21300000, guid: 2c4e715392624c64380f73ed11b4a202, type: 3}
   description: 
   stackable: 0
