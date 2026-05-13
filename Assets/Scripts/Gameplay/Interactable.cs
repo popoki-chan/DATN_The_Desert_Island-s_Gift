@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 [RequireComponent(typeof(Collider2D))]
 public class Interactable : MonoBehaviour
@@ -49,7 +51,7 @@ public class Interactable : MonoBehaviour
     [Header("Pickup Anim")]
     public float pickupJumpHeight = 2f;      // world units nhảy lên
     public float pickupDuration = 0.45f;       // thời gian animation
-    public AnimationCurve pickupCurve = AnimationCurve.EaseInOut(0, 1, 2, 1); // curve cho chuyển động
+    public AnimationCurve pickupCurve = AnimationCurve.EaseInOut(0, 0, 1, 1); // curve cho chuyển động
     public bool fadeOutOnPickup = false;        // có fade sprite khi nhặt không
     public float fadeDuration = 0.05f;         // thời gian fade (phần cuối)
     public AudioClip pickupSfx;
@@ -83,23 +85,36 @@ public class Interactable : MonoBehaviour
 
     void OnMouseDown()
     {
+        // Raise event for listeners
         OnClicked?.Invoke(this);
 
+        // If pickable, perform pickup flow
         if (isPickable)
         {
             Pickup();
             return;
         }
 
+        // If locked, try to use selected inventory item on this interactable
         if (isLocked)
         {
             if (Inventory.Instance != null)
             {
-                Inventory.Instance.TryUseOn(Inventory.Instance.currentSelectedItem, this);
+                // Safe logging: avoid using undefined 'target' variable; use 'this'
+                var sel = Inventory.Instance.currentSelectedItem;
+                string selId = sel != null ? (string.IsNullOrEmpty(sel.itemId) ? "(no-id)" : sel.itemId) : "null";
+                Debug.Log($"[Caller] Calling TryUseOn on {this.name} (id:{id}) with selected: {selId}");
+
+                Inventory.Instance.TryUseOn(sel, this);
+            }
+            else
+            {
+                Debug.LogWarning("[Interactable] Inventory.Instance is null when trying to use item on locked object.");
             }
             return;
         }
 
+        // Zoomable view handling
         if (isZoomable && targetView != null)
         {
             AudioManager.Instance?.PlaySFX(onClickSfx);
@@ -107,12 +122,12 @@ public class Interactable : MonoBehaviour
             return;
         }
 
+        // Default interaction
         Interact();
     }
 
     public virtual void Interact()
     {
-        Debug.Log($"[Interactable] Interact: {id}");
         AudioManager.Instance?.PlaySFX(onClickSfx);
 
         switch (action)
@@ -345,5 +360,51 @@ public class Interactable : MonoBehaviour
         transform.rotation = initialRotation;
         isRotated = false;
         toggleState = false;
+    }
+
+    // ----- Additional debug helpers added -----
+
+    // Safe helper to get item id string
+    string SafeItemId(Item item)
+    {
+        if (item == null) return "null";
+        return string.IsNullOrEmpty(item.itemId) ? "(no-id)" : item.itemId;
+    }
+
+    // ContextMenu để test nhanh trong Inspector (Play Mode)
+    [ContextMenu("Test Interact (no item)")]
+    public void TestInteract()
+    {
+        Debug.Log("[Test] Manual Interact called from Inspector on " + name);
+        Interact();
+    }
+
+    [ContextMenu("Test Use With Selected Inventory Item")]
+    public void TestUseWithSelected()
+    {
+        if (Inventory.Instance == null)
+        {
+            Debug.LogWarning("[Test] Inventory.Instance is null");
+            return;
+        }
+
+        var item = Inventory.Instance.currentSelectedItem;
+        Debug.Log("[Test] currentSelectedItem: " + (item == null ? "null" : SafeItemId(item)));
+        Inventory.Instance.TryUseOn(item, this);
+    }
+
+    [ContextMenu("Test Use With Required ItemId")]
+    public void TestUseWithRequiredId()
+    {
+        if (string.IsNullOrEmpty(requiredItemId))
+        {
+            Debug.LogWarning("[Test] requiredItemId is empty on " + name);
+            return;
+        }
+
+        // cố gắng load Item từ Resources/Items/<requiredItemId> (nếu bạn lưu Item assets ở đó)
+        Item asset = Resources.Load<Item>($"Items/{requiredItemId}");
+        Debug.Log("[Test] Loaded asset: " + (asset == null ? "null" : SafeItemId(asset)));
+        Inventory.Instance?.TryUseOn(asset, this);
     }
 }

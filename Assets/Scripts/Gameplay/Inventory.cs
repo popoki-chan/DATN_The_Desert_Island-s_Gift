@@ -24,10 +24,12 @@ public class Inventory : MonoBehaviour
     public void SelectItem(Item item)
     {
         currentSelectedItem = item;
+        Debug.Log($"[Inventory] Selected item: {(item == null ? "null" : item.itemId)}");
         OnItemSelected?.Invoke(item);
     }
 
- 
+
+
     public void ConsumeSelectedItem()
     {
         if (currentSelectedItem != null)
@@ -70,53 +72,60 @@ public class Inventory : MonoBehaviour
     }
 
     // --- HỆ THỐNG SỬ DỤNG ĐỒ ---
-    public void TryUseOn(Item item, Interactable target)
+    public bool TryUseOn(Item item, Interactable target)
     {
-        if (target == null) return;
+        Debug.Log($"[TryUseOn] Enter target:{(target == null ? "null" : target.id)} item:{(item == null ? "null" : item.itemId)}");
 
-        // Nếu người chơi KHÔNG cầm gì trên tay nhưng click vào vật bị khóa
+        if (target == null) return false;
+
         if (item == null)
         {
-            Debug.Log($"[Khóa] {target.id} cần có {target.requiredItemId} để mở, nhưng bạn đang tay không!");
-            TooltipUI.Instance?.Show("Nó bị khóa rồi...");
-            // AudioManager.Instance?.PlaySFX(lockedSfx);
-            return;
+            Debug.Log("[TryUseOn] No item selected");
+            TooltipUI.Instance?.Show("Bạn đang tay không...");
+            return false;
         }
 
-        // Nếu vật thể yêu cầu một item cụ thể (isLocked = true)
+        Debug.Log($"[TryUseOn] target.requiredItemId = {target.requiredItemId}");
+
         if (!string.IsNullOrEmpty(target.requiredItemId))
         {
-            if (item.itemId == target.requiredItemId)
+            string selectedId = item.itemId;
+            Debug.Log($"[TryUseOn] comparing selectedId:{selectedId} with required:{target.requiredItemId}");
+            if (selectedId == target.requiredItemId)
             {
-                // THÀNH CÔNG
-                Debug.Log($"Đã dùng {item.itemId} lên {target.id} thành công.");
-
-                // Mở khóa
+                Debug.Log("[TryUseOn] Match! executing success flow");
+                // gọi Interact trước khi remove nếu Interact cần item
                 target.isLocked = false;
-
-                // Kích hoạt Puzzle Manager nếu có
                 PuzzleManager.Instance?.SetState(target.id + "_used", true);
-
-                // Phát âm thanh
                 AudioManager.Instance?.PlaySFX(target.onClickSfx);
-
-                // Gọi hàm mới để trừ đồ và dọn dẹp UI
-                ConsumeSelectedItem();
-
-                // (Tùy chọn) Gọi hàm Interact của vật thể để nó tiếp tục hiển thị đồ bên trong
                 target.Interact();
+                ConsumeSelectedItem();
+                return true;
             }
             else
             {
-                // SAI ĐỒ
-                Debug.Log("Vật phẩm này không dùng ở đây được.");
+                Debug.Log("[TryUseOn] Item does not match required");
                 TooltipUI.Instance?.Show("Không đúng chìa khóa rồi...");
-                // AudioManager.Instance?.PlaySFX(wrongItemSfx);
+                return false;
             }
-            return;
         }
 
-        // Fallback: Nếu không có requiredItemId, thử ghép nối với PuzzleManager
-        PuzzleManager.Instance?.TrySolveCombination(target.id, item.itemId);
+        if (PuzzleManager.Instance != null)
+        {
+            bool solved = PuzzleManager.Instance.TrySolveCombination(target.id, item.itemId);
+            Debug.Log("[TryUseOn] TrySolveCombination returned: " + solved);
+            return solved;
+        }
+
+        Debug.Log("[TryUseOn] No requiredItemId and no PuzzleManager");
+        return false;
+    }
+
+
+    // Helper lấy id từ Item, sửa nếu Item dùng tên khác
+    private string GetItemId(Item item)
+    {
+        if (item == null) return null;
+        return item.itemId; // nếu class Item của bạn dùng tên khác, đổi ở đây
     }
 }

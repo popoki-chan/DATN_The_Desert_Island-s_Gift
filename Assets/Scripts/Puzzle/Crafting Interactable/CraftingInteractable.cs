@@ -1,0 +1,173 @@
+﻿using UnityEngine;
+using System.Collections;
+
+[RequireComponent(typeof(Collider2D))] // Đảm bảo luôn có Collider để click trúng
+public class CraftingInteractable : MonoBehaviour
+{
+    [Header("Recipe")]
+    public string requiredItemId;
+    public string resultItemId;
+    public GameObject resultPrefab;
+
+    [Header("Settings & Effects")]
+    [Tooltip("Dùng xong có mất đồ trên tay không?")]
+    public bool consumeRequiredItem = true;
+    [Tooltip("Thời gian rung lắc xử lý (giây)")]
+    public float processTime = 0.5f;
+    [Tooltip("Âm thanh khi tương tác")]
+    public AudioClip interactSFX;
+
+    [Header("Debug")]
+    public bool spawnAtCameraForTest = false;
+
+    private bool crafted = false;
+
+    // --- BẮT SỰ KIỆN CLICK CHUỘT (PHẦN MỚI THÊM) ---
+    void OnMouseDown()
+    {
+        // Khi click vào vật thể, tự động lấy món đồ đang chọn trong túi đồ ra xài
+        if (Inventory.Instance != null)
+        {
+            TryUseItem(Inventory.Instance.currentSelectedItem);
+        }
+        else
+        {
+            Debug.LogWarning("[Crafting] Inventory.Instance is null!");
+        }
+    }
+
+    // --- HÀM CHÍNH: trả về item đang tương tác (có thể null) ---
+    public Item GetInteractingItem(Item currentSelectedItem)
+    {
+        if (currentSelectedItem == null)
+        {
+            Debug.Log("[Crafting] No item selected when interacting with " + name);
+            return null;
+        }
+
+        string id = GetItemId(currentSelectedItem);
+        Debug.Log($"[Crafting] Interacting item id: {id} with target {name}");
+        return currentSelectedItem;
+    }
+
+    // Kiểm tra nhanh xem item hiện tại có khớp recipe không
+    public bool IsMatchingRequiredItem(Item currentSelectedItem)
+    {
+        if (currentSelectedItem == null) return false;
+        string id = GetItemId(currentSelectedItem);
+        return !string.IsNullOrEmpty(requiredItemId) && id == requiredItemId;
+    }
+
+    // Gọi khi muốn thực hiện craft
+    public void TryUseItem(Item currentSelectedItem)
+    {
+        if (crafted)
+        {
+            Debug.Log("[Crafting] Already crafted on " + name);
+            return;
+        }
+
+        GetInteractingItem(currentSelectedItem);
+
+        if (IsMatchingRequiredItem(currentSelectedItem))
+        {
+            // Thay vì Spawn ngay lập tức, gọi Coroutine để chạy hiệu ứng
+            StartCoroutine(ProcessCrafting(currentSelectedItem));
+        }
+        else
+        {
+            Debug.Log($"[Crafting] Item does not match recipe on {name}. Required: {requiredItemId}");
+        }
+    }
+
+    // Coroutine xử lý hiệu ứng "Juice" và tạo vật phẩm
+    private IEnumerator ProcessCrafting(Item currentSelectedItem)
+    {
+        crafted = true; // Khóa lại không cho bấm spam nữa
+
+        // 1. Trừ vật phẩm trên tay (Dùng ConsumeSelectedItem để tắt luôn viền vàng UI)
+        if (consumeRequiredItem && Inventory.Instance != null)
+        {
+            Inventory.Instance.ConsumeSelectedItem();
+        }
+
+        // 2. Chạy âm thanh
+        if (interactSFX != null && Camera.main != null)
+        {
+            AudioSource.PlayClipAtPoint(interactSFX, Camera.main.transform.position);
+        }
+
+        // 3. Hiệu ứng rung lắc (Vibe giải đố)
+        Vector3 startPos = transform.position;
+        float elapsed = 0f;
+        while (elapsed < processTime)
+        {
+            transform.position = startPos + (Vector3)Random.insideUnitCircle * 0.05f;
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = startPos; // Trả về vị trí cũ cho chắc
+
+        // 4. Sinh ra vật phẩm mới
+        SpawnResult();
+
+        // 5. Cất vật thể gốc đi (Biến mất)
+        gameObject.SetActive(false);
+    }
+
+    void SpawnResult()
+    {
+        if (resultPrefab == null)
+        {
+            Debug.LogWarning("[Crafting] resultPrefab is null on " + gameObject.name);
+            return;
+        }
+
+        Vector3 spawnPos;
+        if (spawnAtCameraForTest && Camera.main != null)
+        {
+            spawnPos = Camera.main.transform.position + Camera.main.transform.forward * 2f;
+            Debug.Log("[Crafting] Spawning at camera for test at " + spawnPos);
+        }
+        else
+        {
+            // Spawn tại chính vị trí object chứa script, với offset lên trên để tránh chồng lấp
+            spawnPos = transform.position + Vector3.up * 0.5f;
+        }
+
+        GameObject spawned = Instantiate(resultPrefab, spawnPos, Quaternion.identity);
+
+        if (spawned == null)
+        {
+            Debug.LogWarning("[Crafting] Instantiate returned null for " + resultPrefab.name);
+            return;
+        }
+
+        spawned.SetActive(true);
+        Debug.Log($"[Crafting] Spawned {spawned.name} at {spawned.transform.position} parent:{(spawned.transform.parent ? spawned.transform.parent.name : "root")} active:{spawned.activeSelf}");
+    }
+
+    // Helper lấy id từ Item
+    string GetItemId(Item item)
+    {
+        return item.itemId;
+    }
+
+    // ContextMenu để test thủ công trong Play Mode
+    [ContextMenu("Spawn Result Manual (use current inventory selection)")]
+    public void SpawnResultManual()
+    {
+        var item = Inventory.Instance != null ? Inventory.Instance.currentSelectedItem : null;
+        Debug.Log("[Crafting] Manual spawn test. Inventory selected: " + (item == null ? "null" : item.itemId));
+        TryUseItem(item);
+    }
+
+    [ContextMenu("Spawn Result Force (no check)")]
+    public void SpawnResultForce()
+    {
+        Debug.Log("[Crafting] Force spawn (bypass checks)");
+        crafted = true;
+        SpawnResult();
+        gameObject.SetActive(false);
+    }
+}
