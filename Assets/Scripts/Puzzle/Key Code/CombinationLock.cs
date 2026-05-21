@@ -3,63 +3,78 @@
 public class CombinationLock : MonoBehaviour
 {
     [Header("Các dải số")]
-    public NumberWheel2D[] wheels; // kéo 3 wheel vào inspector
+    public NumberWheel2D[] wheels;
 
     [Header("Mật mã đúng")]
-    public string correctCode = "198"; // Bạn có thể đổi pass trực tiếp trên Inspector
+    public string correctCode = "198";
 
-    [Header("Hành động khi mở khóa")]
-    public AudioClip unlockSfx;
-    public Interactable targetChest; // Kéo cái Rương/Hộp mà ổ khóa này bảo vệ vào đây
+    [Header("Liên kết Rương chính (View Cận cảnh)")]
+    public Interactable targetChest;
+
+    [Header("Đổi ảnh rương ở View Cận cảnh")]
+    public GameObject chestClosedVisual;
+    public GameObject chestOpenVisual;
+
+    [Header("Đồng bộ View Main")]
+    [Tooltip("Kéo Rương đang đóng ở View Main Room vào đây")]
+    public GameObject mainViewChestClosed;
+    [Tooltip("Kéo Rương mở ở View Main Room vào đây (Nhớ tắt tàng hình nó đi nhé)")]
+    public GameObject mainViewChestOpen;
+
+    [Header("View Bên Trong Rương")]
+    public GameObject viewInChest;
 
     private bool isUnlocked = false;
 
-    // Hàm này sẽ được gọi mỗi khi người chơi vuốt xong 1 số
     public void CheckCode()
     {
-        if (wheels == null || wheels.Length < correctCode.Length)
-        {
-            Debug.LogWarning("[LockController] Wheels chưa gán đủ.");
-            return;
-        }
+        if (isUnlocked) return;
+        if (wheels == null || wheels.Length < correctCode.Length) return;
 
         for (int i = 0; i < correctCode.Length; i++)
         {
-            if (wheels[i].currentNumber != correctCode[i])
+            if (wheels[i].currentNumber.ToString() != correctCode[i].ToString())
             {
-                Debug.Log("Mã sai");
                 return;
             }
-            Debug.Log("Mở khóa thành công!");
-            Unlock();
+        }
+        Unlock();
+    }
+
+    private void Unlock()
+    {
+        isUnlocked = true;
+        Debug.Log("<color=green>[CombinationLock]</color> Mật mã ĐÚNG! Đồng bộ rương toàn cục.");
+
+        // 1. Đổi ảnh rương Cận Cảnh
+        if (chestClosedVisual != null) chestClosedVisual.SetActive(false);
+        if (chestOpenVisual != null) chestOpenVisual.SetActive(true);
+
+        // 1.1 ĐỒNG BỘ: Đổi ảnh rương Ngoài Bãi Biển
+        if (mainViewChestClosed != null) mainViewChestClosed.SetActive(false);
+        if (mainViewChestOpen != null) mainViewChestOpen.SetActive(true);
+
+        // 2. Mở khóa logic & tráo đường link Zoom
+        if (targetChest != null)
+        {
+            targetChest.isLocked = false;
+            targetChest.requiredItemId = "";
+
+            if (viewInChest != null)
+            {
+                targetChest.targetView = viewInChest;
+            }
         }
 
-        void Unlock()
+        // 3. Tự lùi camera ra ngoài sau 0.8s
+        Invoke(nameof(ExitZoom), 0.8f);
+    }
+
+    private void ExitZoom()
+    {
+        if (ViewManager.Instance != null)
         {
-            isUnlocked = true;
-            Debug.Log("Mật mã ĐÚNG! Khóa đã được mở.");
-
-            // 1. Phát âm thanh "Cạch"
-            AudioManager.Instance?.PlaySFX(unlockSfx);
-
-            // 2. Chuyển trạng thái cái rương từ Khóa -> Mở
-            if (targetChest != null)
-            {
-                targetChest.isLocked = false;
-                // Lúc này người chơi quay lại phòng chính, click vào rương là nó sẽ mở ra!
-            }
-
-            // 3. Tự động lùi về góc nhìn trước đó (thoát khỏi màn hình cận cảnh ổ khóa)
-            // Nếu có hiệu ứng trễ 0.5s rồi mới lùi thì càng đẹp, mình dùng Invoke nhé:
-            Invoke(nameof(ExitZoom), 0.8f);
-        }
-
-        void ExitZoom()
-        {
-            if (ViewManager.Instance != null)
-            {
-                ViewManager.Instance.GoBack();
-            }
+            ViewManager.Instance.GoBack();
         }
     }
 }

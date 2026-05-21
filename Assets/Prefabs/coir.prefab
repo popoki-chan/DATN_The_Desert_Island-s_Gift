@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 4473751578451774154}
   - component: {fileID: -3457659367590130184}
   - component: {fileID: 2210131023445304785}
+  - component: {fileID: -8994376995842925467}
+  - component: {fileID: -6054187605725896347}
   m_Layer: 0
   m_Name: coir
   m_TagString: Untagged
@@ -151,6 +153,18 @@ MonoBehaviour:
   onClickSfx: {fileID: 0}
   isZoomable: 0
   targetView: {fileID: 0}
+--- !u!114 &-8994376995842925467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1301286514477306317}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75fb0f2c7a1033d4994b36aa677a0622, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   action: 0
   shakeDuration: 0.6
   shakeAmplitude: 8
@@ -159,34 +173,25 @@ MonoBehaviour:
   rotateAngle: 90
   targetAngle: 90
   rotateDuration: 0.4
-  rotateOnce: 1
+  rotateEase: 27
+  rotateOnce: 0
   allowShakeDuringRotate: 0
-  pickupJumpHeight: 2
-  pickupDuration: 0.45
-  pickupCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 2.9984004
-      outSlope: 2.9984004
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.063088484
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: -0.59240097
-      outSlope: -0.59240097
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.27637392
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  fadeOutOnPickup: 0
-  fadeDuration: 0.05
-  pickupSfx: {fileID: 0}
+  jumpHeight: 2
+  dipAmount: 0.4
+  jumpDuration: 0.45
+  useFade: 0
+  fadeDuration: 0.2
+--- !u!114 &-6054187605725896347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1301286514477306317}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae9e45e9c23005d4fa8cedf369a0f6d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visualToActivate: {fileID: 0}
+  disableInteractionAfterPlace: 1

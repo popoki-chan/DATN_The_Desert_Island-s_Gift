@@ -1,35 +1,30 @@
 ﻿using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 
 [RequireComponent(typeof(SpriteRenderer))]
-
 public class NumberWheel2D : MonoBehaviour
 {
-    private SpriteRenderer numberRenderer;
-    private Sprite[] digitSprites;
+    [Header("Liên kết với ổ khóa")]
+    public CombinationLock lockManager; // THÊM CÁI NÀY: Để báo cho ổ khóa mỗi khi xoay
+
     [Tooltip("Đường dẫn trong Resources tới file sprite sheet (không có .png)")]
     public string resourcesPath = "Extra_assets/number_lock";
+
     [HideInInspector]
     public int currentNumber = 0;
+
+    private SpriteRenderer numberRenderer;
+    private Sprite[] digitSprites;
 
     void Awake()
     {
         numberRenderer = GetComponent<SpriteRenderer>();
-
-        // Load tất cả sprite con từ sprite sheet đã slice
         var sprites = Resources.LoadAll<Sprite>(resourcesPath);
-        if (sprites == null || sprites.Length == 0)
+
+        if (sprites != null && sprites.Length > 0)
         {
-            Debug.LogWarning($"[LockWheel2D] Không load được sprites từ Resources/{resourcesPath}");
-            digitSprites = new Sprite[0];
-        }
-        else
-        {
-            // Sort theo tên để đảm bảo thứ tự 0->9 nếu tên là number_lock_0...
             digitSprites = sprites.OrderBy(s => s.name).ToArray();
         }
-
         UpdateDisplay();
     }
 
@@ -38,6 +33,9 @@ public class NumberWheel2D : MonoBehaviour
         if (digitSprites == null || digitSprites.Length == 0) return;
         currentNumber = (currentNumber + 1) % digitSprites.Length;
         UpdateDisplay();
+
+        // Báo cho ổ khóa kiểm tra mật mã ngay sau khi số thay đổi
+        if (lockManager != null) lockManager.CheckCode();
     }
 
     public void Decrement()
@@ -45,19 +43,16 @@ public class NumberWheel2D : MonoBehaviour
         if (digitSprites == null || digitSprites.Length == 0) return;
         currentNumber = (currentNumber - 1 + digitSprites.Length) % digitSprites.Length;
         UpdateDisplay();
-    }
 
-    public void SetNumber(int num)
-    {
-        if (digitSprites == null || digitSprites.Length == 0) return;
-        currentNumber = Mathf.Clamp(num, 0, digitSprites.Length - 1);
-        UpdateDisplay();
+        // Báo cho ổ khóa kiểm tra mật mã ngay sau khi số thay đổi
+        if (lockManager != null) lockManager.CheckCode();
     }
 
     void UpdateDisplay()
     {
-        if (numberRenderer == null) return;
-        if (digitSprites != null && digitSprites.Length > 0)
+        if (numberRenderer != null && digitSprites != null && digitSprites.Length > 0)
+        {
             numberRenderer.sprite = digitSprites[currentNumber];
+        }
     }
 }
