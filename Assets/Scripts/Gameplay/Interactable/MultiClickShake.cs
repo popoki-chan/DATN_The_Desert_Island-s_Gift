@@ -1,27 +1,30 @@
 ﻿using UnityEngine;
-using DG.Tweening; // Bắt buộc phải có để dùng DOShake
+using System.Collections;
+using DG.Tweening;
 
 [RequireComponent(typeof(Interactable))]
 public class MultiClickShake : MonoBehaviour
 {
     public enum ShakeMode { Rotation, Position }
 
-    [Header("Cài đặt Click")]
-    [Tooltip("Số lần click cần thiết để lấy được đồ")]
+    [Header("Click Settings")]
     public int requiredClicks = 3;
     private int currentClicks = 0;
 
-    [Header("Hiệu ứng Rung (DOTween)")]
+    [Header("Shake Effect")]
     public ShakeMode shakeMode = ShakeMode.Rotation;
     public float shakeDuration = 0.2f;
-    [Tooltip("Độ mạnh của cú rung (Góc xoay hoặc khoảng cách giật)")]
     public float shakeStrength = 15f;
 
-    [Header("Kết quả sau khi click đủ")]
-    [Tooltip("Vật thể thật sự sẽ rớt ra để nhặt (Kéo object đang tàng hình vào đây)")]
+    [Header("Drop Item")]
+
+    [Tooltip("CÁCH 1: Nhặt thẳng vật thể này vào túi (Kéo file Data Item của nó vào đây)")]
+    public Item directPickupItem; // TÍNH NĂNG MỚI NẰM Ở ĐÂY
+
+    [Tooltip("CÁCH 2: Rớt ra một vật thể khác (Kéo object đang tàng hình vào đây)")]
     public GameObject itemToReveal;
 
-    [Tooltip("Tick vào nếu muốn vật thể gốc này biến mất sau khi nhả đồ (như đập vỡ bình)")]
+    [Tooltip("Tick vào nếu muốn vật thể gốc này biến mất sau khi nhặt xong")]
     public bool destroyAfterDone = true;
 
     private Interactable coreLogic;
@@ -46,46 +49,68 @@ public class MultiClickShake : MonoBehaviour
         if (currentClicks >= requiredClicks) return;
 
         currentClicks++;
-
-        // 1. Dừng ngay hiệu ứng rung cũ nếu người chơi click quá nhanh (spam click)
         transform.DOComplete();
 
-        // 2. Chạy hiệu ứng Rung
+        // Nếu đã đủ số click -> Chạy cú rung cuối cùng rồi mới nhặt
+        if (currentClicks >= requiredClicks)
+        {
+            StartCoroutine(FinalClickRoutine());
+        }
+        else
+        {
+            // Nếu chưa đủ thì cứ rung bình thường
+            DoShake();
+        }
+    }
+
+    private void DoShake()
+    {
         if (shakeMode == ShakeMode.Rotation)
         {
-            // Lắc qua lắc lại (Phù hợp rút dao, cạy gạch, nhổ củ cải...)
             transform.DOShakeRotation(shakeDuration, new Vector3(0, 0, shakeStrength), vibrato: 10, randomness: 90);
         }
         else
         {
-            // Giật giật vị trí (Phù hợp đập gõ, đập heo đất...)
             transform.DOShakePosition(shakeDuration, strength: shakeStrength / 50f, vibrato: 10, randomness: 90);
         }
+    }
 
-        // Âm thanh (nếu có thể thêm sau này)
-        // Debug.Log($"<color=orange>[MultiClickShake]</color> Đã click {currentClicks}/{requiredClicks}");
+    private IEnumerator FinalClickRoutine()
+    {
+        // 1. Tạm khóa click để tránh spam trong lúc đang diễn cú rung chót
+        coreLogic.isLocked = true;
 
-        // 3. Kiểm tra xem đã click đủ chưa
-        if (currentClicks >= requiredClicks)
+        // 2. Rung cú chót bần bật
+        DoShake();
+
+        // NÍN THỞ CHỜ RUNG XONG (Cảm giác game cực đã nằm ở dòng này)
+        yield return new WaitForSeconds(shakeDuration);
+
+        // 3. XỬ LÝ PHẦN THƯỞNG
+        transform.DOComplete();
+
+        // CÁCH 1: Tự động nhặt thẳng vào túi
+        if (directPickupItem != null && Inventory.Instance != null)
         {
-            // Reset lại góc/vị trí cho ngay ngắn trước khi biến mất
-            transform.DOComplete();
+            Inventory.Instance.AddItem(directPickupItem);
+            Debug.Log($"<color=green>[MultiClickShake]</color> Đã tự động nhặt {directPickupItem.itemId} vào túi!");
+        }
 
-            if (itemToReveal != null)
-            {
-                itemToReveal.SetActive(true); // Nhả đồ ra!
-            }
+        // CÁCH 2: Nhả object khác (Dùng cho các câu đố cũ)
+        if (itemToReveal != null)
+        {
+            itemToReveal.SetActive(true);
+        }
 
-            if (destroyAfterDone)
-            {
-                gameObject.SetActive(false); // Xóa sổ vật thể gốc
-            }
-            else
-            {
-                // Nếu không muốn xóa (VD: cục đá bự vẫn nằm đó, chỉ nhả con bọ ra)
-                if (TryGetComponent<Collider2D>(out var col)) col.enabled = false;
-                this.enabled = false;
-            }
+        // 4. DỌN DẸP
+        if (destroyAfterDone)
+        {
+            gameObject.SetActive(false);
+        }
+        else
+        {
+            if (TryGetComponent<Collider2D>(out var col)) col.enabled = false;
+            this.enabled = false;
         }
     }
 }

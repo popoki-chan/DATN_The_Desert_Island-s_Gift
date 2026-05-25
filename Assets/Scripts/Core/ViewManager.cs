@@ -13,9 +13,13 @@ public class ViewManager : MonoBehaviour
     [Tooltip("Kéo TẤT CẢ các View (kể cả mainView) vào đây để hệ thống tự quản lý tắt/bật")]
     public GameObject[] allViews;
 
-    [Header("UI Quay lại")]
+    [Header("UI Button")]
     [Tooltip("Nút mũi tên quay xuống (Back)")]
     public Button backButton;
+    [Tooltip("Kéo Object nút Mũi tên Trái vào đây")]
+    public GameObject leftArrowButton;
+    [Tooltip("Kéo Object nút Mũi tên Phải vào đây")]
+    public GameObject rightArrowButton;
 
     // Dùng Stack (ngăn xếp) để nhớ lịch sử zoom. Bấm Back sẽ lùi lại đúng 1 bước.
     private Stack<GameObject> viewHistory = new Stack<GameObject>();
@@ -45,6 +49,9 @@ public class ViewManager : MonoBehaviour
         backButton.gameObject.SetActive(false); // Ẩn nút Back lúc ở phòng chính
         backButton.onClick.RemoveAllListeners();
         backButton.onClick.AddListener(GoBack);
+
+        // 4. Setup trạng thái ban đầu cho 2 mũi tên trái/phải
+        UpdateArrowsVisibility();
     }
 
     // Hàm này sẽ được gọi khi bạn click vào đồ vật muốn Zoom
@@ -61,6 +68,9 @@ public class ViewManager : MonoBehaviour
 
         // Hiện nút Back
         backButton.gameObject.SetActive(true);
+
+        // Ẩn/Hiện mũi tên trái phải tùy theo góc nhìn mới
+        UpdateArrowsVisibility();
     }
 
     public void GoBack()
@@ -81,6 +91,20 @@ public class ViewManager : MonoBehaviour
             {
                 backButton.gameObject.SetActive(false);
             }
+
+            // Ẩn/Hiện mũi tên trái phải khi lùi ra
+            UpdateArrowsVisibility();
         }
+    }
+
+    // --- HÀM MỚI: TỰ ĐỘNG KIỂM TRA ĐỂ BẬT/TẮT MŨI TÊN ---
+    private void UpdateArrowsVisibility()
+    {
+        // Kiểm tra xem view trên cùng của ngăn xếp có khớp với mainView không
+        bool isAtMainRoom = (viewHistory.Count > 0 && viewHistory.Peek() == mainView);
+
+        // Nếu đang ở Main View -> Hiện mũi tên. Bất kỳ View nào khác -> Ẩn mũi tên.
+        if (leftArrowButton != null) leftArrowButton.SetActive(isAtMainRoom);
+        if (rightArrowButton != null) rightArrowButton.SetActive(isAtMainRoom);
     }
 }
