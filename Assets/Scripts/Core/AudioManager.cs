@@ -22,8 +22,28 @@ public class AudioManager : MonoBehaviour
 
     void Start()
     {
+        // Load saved volume preferences
+        musicVolume = PlayerPrefs.GetFloat("MusicVolume", 0.7f);
+        sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
+
         if (musicSource != null) musicSource.volume = musicVolume;
         if (sfxSource != null) sfxSource.volume = sfxVolume;
+    }
+
+    public void SetMusicVolume(float volume)
+    {
+        musicVolume = Mathf.Clamp01(volume);
+        if (musicSource != null) musicSource.volume = musicVolume;
+        PlayerPrefs.SetFloat("MusicVolume", musicVolume);
+        PlayerPrefs.Save();
+    }
+
+    public void SetSFXVolume(float volume)
+    {
+        sfxVolume = Mathf.Clamp01(volume);
+        if (sfxSource != null) sfxSource.volume = sfxVolume;
+        PlayerPrefs.SetFloat("SFXVolume", sfxVolume);
+        PlayerPrefs.Save();
     }
 
     public void PlayMusic(AudioClip clip, bool loop = true)

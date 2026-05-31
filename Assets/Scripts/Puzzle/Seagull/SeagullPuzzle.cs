@@ -21,6 +21,7 @@ public class SeagullPuzzle : MonoBehaviour
     [Header("4. Sự kiện & Bong bóng")]
     public UnityEvent onEndingTriggered;
     public PopupBubble popupBubble;
+    public CutscenePlayer endingCutscenePlayer;
 
     [Header("5. Visual Quả khi cắp")]
     public GameObject uncarvedFruitVisual;
@@ -34,6 +35,7 @@ public class SeagullPuzzle : MonoBehaviour
 
     private bool isFlying = false;
     private Interactable interactable;
+    private Tween delayedReturnTween;
 
     void Awake()
     {
@@ -46,6 +48,15 @@ public class SeagullPuzzle : MonoBehaviour
                 originalSprite = seagullSpriteRenderer.sprite;
             }
         }
+    }
+
+    void OnDestroy()
+    {
+        if (seagullVisual != null)
+        {
+            seagullVisual.DOKill();
+        }
+        delayedReturnTween?.Kill();
     }
 
     void Start()
@@ -118,8 +129,11 @@ public class SeagullPuzzle : MonoBehaviour
                 seagullSpriteRenderer.sprite = originalSprite;
             }
             seagullVisual.position = spawnPoint.position;
-            DOVirtual.DelayedCall(3f, () => {
-                seagullVisual.DOMove(rockPoint.position, flyDuration).OnComplete(() => isFlying = false);
+            delayedReturnTween = DOVirtual.DelayedCall(3f, () => {
+                if (seagullVisual != null && rockPoint != null)
+                {
+                    seagullVisual.DOMove(rockPoint.position, flyDuration).OnComplete(() => isFlying = false);
+                }
             });
         });
     }
@@ -152,6 +166,12 @@ public class SeagullPuzzle : MonoBehaviour
             }
         }
 
-        seagullVisual.DOMove(flyOutPoint.position, flyDuration).OnComplete(() => onEndingTriggered?.Invoke());
+        seagullVisual.DOMove(flyOutPoint.position, flyDuration).OnComplete(() => {
+            onEndingTriggered?.Invoke();
+            if (endingCutscenePlayer != null)
+            {
+                endingCutscenePlayer.PlayCutscene();
+            }
+        });
     }
 }

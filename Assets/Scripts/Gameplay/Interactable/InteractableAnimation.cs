@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using UnityEngine;
 using DG.Tweening;
@@ -218,5 +218,10 @@ public class InteractableAnimation : MonoBehaviour
         {
             onCompleteCallback?.Invoke();
         });
+    }
+
+    void OnDestroy()
+    {
+        transform.DOKill();
     }
 }

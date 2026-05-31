@@ -28,6 +28,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void OnEnable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
     void EnsureReferences()
     {
         if (inventory == null) inventory = FindObjectOfType<Inventory>();
@@ -37,5 +47,24 @@ public class GameManager : MonoBehaviour
         if (saveSystem == null) saveSystem = FindObjectOfType<SaveSystem>();
     }
 
-    
+    private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+    {
+        if (Instance != this) return;
+
+        string sceneName = scene.name;
+        if (sceneName.StartsWith("Chapter"))
+        {
+            string numStr = sceneName.Replace("Chapter", "");
+            if (int.TryParse(numStr, out int chapterNum))
+            {
+                int currentUnlocked = PlayerPrefs.GetInt("UnlockedChapter", 1);
+                if (chapterNum > currentUnlocked)
+                {
+                    PlayerPrefs.SetInt("UnlockedChapter", chapterNum);
+                    PlayerPrefs.Save();
+                    Debug.Log($"<color=green>[GameManager] Tự động mở khóa Chapter {chapterNum} khi vào scene!</color>");
+                }
+            }
+        }
+    }
 }

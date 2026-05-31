@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using DG.Tweening;
 using Spine.Unity;
 
@@ -105,5 +105,10 @@ public class GiveItem : MonoBehaviour
         }
 
         this.enabled = false;
+    }
+
+    void OnDestroy()
+    {
+        transform.DOKill();
     }
 }

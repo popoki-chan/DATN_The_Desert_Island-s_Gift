@@ -1,5 +1,6 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(Collider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
@@ -45,11 +46,15 @@ public class SandRevealToggle : MonoBehaviour
 
     void OnMouseDown()
     {
+        if (SettingsPopupController.IsOpen) return;
+        if (IsPointerOverUI()) return;
         ToggleReveal();
     }
 
     void Update()
     {
+        if (SettingsPopupController.IsOpen) return;
+
         // Touch support
         if (Input.touchCount > 0)
         {
@@ -57,6 +62,7 @@ public class SandRevealToggle : MonoBehaviour
             {
                 if (t.phase == TouchPhase.Began)
                 {
+                    if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(t.fingerId)) continue;
                     Vector2 wp = Camera.main.ScreenToWorldPoint(t.position);
                     Collider2D hit = Physics2D.OverlapPoint(wp);
                     if (hit == col) ToggleReveal();
@@ -95,7 +101,14 @@ public class SandRevealToggle : MonoBehaviour
         foreach (var go in revealObjects)
         {
             if (go == null) continue;
-            go.SetActive(hidden ? true : false);
+            foreach (var c in go.GetComponentsInChildren<Collider2D>(true))
+            {
+                c.enabled = hidden;
+            }
+            foreach (var interact in go.GetComponentsInChildren<Interactable>(true))
+            {
+                interact.enabled = hidden;
+            }
         }
     }
 
@@ -127,11 +140,18 @@ public class SandRevealToggle : MonoBehaviour
         // disable collider nếu cần
         if (col != null && disableColliderWhenHidden) col.enabled = false;
 
-        // bật các object nằm dưới
+        // bật tương tác của các object nằm dưới
         foreach (var go in revealObjects)
         {
             if (go == null) continue;
-            go.SetActive(true);
+            foreach (var c in go.GetComponentsInChildren<Collider2D>(true))
+            {
+                c.enabled = true;
+            }
+            foreach (var interact in go.GetComponentsInChildren<Interactable>(true))
+            {
+                interact.enabled = true;
+            }
         }
 
         isHidden = true;
@@ -139,11 +159,18 @@ public class SandRevealToggle : MonoBehaviour
 
     IEnumerator FadeInAndHideReveals()
     {
-        // tắt các object nằm dưới trước khi fade in cát (nếu muốn)
+        // tắt tương tác của các object nằm dưới trước khi fade in cát
         foreach (var go in revealObjects)
         {
             if (go == null) continue;
-            go.SetActive(false);
+            foreach (var c in go.GetComponentsInChildren<Collider2D>(true))
+            {
+                c.enabled = false;
+            }
+            foreach (var interact in go.GetComponentsInChildren<Interactable>(true))
+            {
+                interact.enabled = false;
+            }
         }
 
         // enable collider trước khi fade in (để có thể click nếu cần)
@@ -194,5 +221,17 @@ public class SandRevealToggle : MonoBehaviour
             yield return null;
         }
         transform.position = start;
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) return false;
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+                return true;
+        }
+        return false;
     }
 }

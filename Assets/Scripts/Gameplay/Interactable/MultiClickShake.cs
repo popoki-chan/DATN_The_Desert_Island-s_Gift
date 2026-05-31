@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using DG.Tweening;
 
@@ -112,5 +112,10 @@ public class MultiClickShake : MonoBehaviour
             if (TryGetComponent<Collider2D>(out var col)) col.enabled = false;
             this.enabled = false;
         }
+    }
+
+    void OnDestroy()
+    {
+        transform.DOKill();
     }
 }

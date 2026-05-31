@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(Collider2D))] // Đảm bảo luôn có Collider để click trúng
 public class CraftingInteractable : MonoBehaviour
@@ -25,6 +26,9 @@ public class CraftingInteractable : MonoBehaviour
     // --- BẮT SỰ KIỆN CLICK CHUỘT (PHẦN MỚI THÊM) ---
     void OnMouseDown()
     {
+        if (SettingsPopupController.IsOpen) return;
+        if (IsPointerOverUI()) return;
+
         // Khi click vào vật thể, tự động lấy món đồ đang chọn trong túi đồ ra xài
         if (Inventory.Instance != null)
         {
@@ -169,5 +173,17 @@ public class CraftingInteractable : MonoBehaviour
         crafted = true;
         SpawnResult();
         gameObject.SetActive(false);
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) return false;
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+                return true;
+        }
+        return false;
     }
 }

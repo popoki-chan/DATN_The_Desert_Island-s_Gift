@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -21,6 +21,10 @@ public class Interactable : MonoBehaviour
     public bool isZoomable = false;
     public GameObject targetView;
 
+    [Header("Đồng bộ trạng thái (Sync Target)")]
+    [Tooltip("GameObject ở view khác cần đồng bộ ẩn/phá hủy theo object này")]
+    public GameObject syncTarget;
+
     // --- SỰ KIỆN CHO CÁC HỆ THỐNG KHÁC LẮNG NGHE ---
     public event Action<Interactable> OnClicked; // Trả lại cho PlayerCursor
     public event Action OnDefaultInteract;       // Dành cho InteractableAnimation (DOTween)
@@ -33,8 +37,21 @@ public class Interactable : MonoBehaviour
     void OnMouseDown()
     {
         // --- THÊM KHIÊN CHỐNG XUYÊN CLICK VÀO NGAY ĐÂY ---
+        if (SettingsPopupController.IsOpen) return;
+
         // Nếu chuột đang nằm trên UI (như nút bấm, ảnh nền UI), thì cấm không cho chạy tiếp code bên dưới!
-        if (EventSystem.current.IsPointerOverGameObject()) return;
+        if (IsPointerOverUI()) return;
+
+        // Tránh click xuyên qua vật thể khác ở phía trước
+        if (Camera.main != null)
+        {
+            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
+            if (hit.collider != null && hit.collider.gameObject != gameObject && !hit.collider.transform.IsChildOf(transform))
+            {
+                return;
+            }
+        }
 
         // Báo hiệu click chuột
         OnClicked?.Invoke(this);
@@ -50,7 +67,14 @@ public class Interactable : MonoBehaviour
             if (Inventory.Instance != null)
             {
                 var sel = Inventory.Instance.currentSelectedItem;
-                Inventory.Instance.TryUseOn(sel, this);
+                bool success = Inventory.Instance.TryUseOn(sel, this);
+                if (!success)
+                {
+                    if (TryGetComponent<PopupBubble>(out var bubble))
+                    {
+                        bubble.PlayAnimation();
+                    }
+                }
             }
             return;
         }
@@ -82,13 +106,36 @@ public class Interactable : MonoBehaviour
         {
             feedback.PlayPickupAnimation(() => {
                 Inventory.Instance?.AddItem(asset);
+                if (syncTarget != null) Destroy(syncTarget);
                 Destroy(gameObject);
             });
         }
         else
         {
             Inventory.Instance?.AddItem(asset);
+            if (syncTarget != null) Destroy(syncTarget);
             Destroy(gameObject);
+        }
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) return false;
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+                return true;
+        }
+        return false;
+    }
+
+    protected virtual void OnDestroy()
+    {
+        // Tự động phá hủy syncTarget khi đối tượng này bị phá hủy (như khi thu hoạch quả)
+        if (syncTarget != null && syncTarget.gameObject != null)
+        {
+            Destroy(syncTarget);
         }
     }
 }

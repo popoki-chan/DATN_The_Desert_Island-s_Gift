@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
@@ -42,6 +42,13 @@ public class FishSpawner : MonoBehaviour
     {
         isMinigameActive = false;
         StopAllCoroutines();
+
+        // Kill active tweens and clean up spawned fish
+        foreach (Transform child in transform)
+        {
+            child.DOKill();
+            Destroy(child.gameObject);
+        }
     }
 
     public void StartMinigame()

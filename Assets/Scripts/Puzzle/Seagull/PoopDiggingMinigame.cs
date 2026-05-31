@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using DG.Tweening;
 
 [RequireComponent(typeof(Interactable))]
@@ -139,6 +139,15 @@ public class PoopDiggingMinigame : MonoBehaviour
             }
 
             if (ViewManager.Instance != null) ViewManager.Instance.GoBack();
+        }
+    }
+
+    void OnDestroy()
+    {
+        transform.DOKill();
+        if (seedVisual != null)
+        {
+            seedVisual.transform.DOKill();
         }
     }
 }

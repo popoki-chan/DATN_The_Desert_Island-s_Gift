@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(Collider2D))]
 [RequireComponent(typeof(NumberWheel2D))]
@@ -19,6 +20,8 @@ public class WheelInputWorld2D : MonoBehaviour
     // MOUSE (Editor / PC)
     void OnMouseDown()
     {
+        if (SettingsPopupController.IsOpen) return;
+        if (IsPointerOverUI()) return;
         isDragging = true;
         pointerStart = Input.mousePosition;
     }
@@ -34,11 +37,18 @@ public class WheelInputWorld2D : MonoBehaviour
     // TOUCH (Mobile)
     void Update()
     {
+        if (SettingsPopupController.IsOpen)
+        {
+            isDragging = false;
+            return;
+        }
+
         if (Input.touchCount == 0) return;
 
         // Tìm touch liên quan đến object này bằng raycast
         foreach (Touch t in Input.touches)
         {
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(t.fingerId)) continue;
             Vector2 worldPos = mainCam.ScreenToWorldPoint(t.position);
             Collider2D hit = Physics2D.OverlapPoint(worldPos);
             if (hit == null || hit.gameObject != gameObject) continue;
@@ -73,5 +83,17 @@ public class WheelInputWorld2D : MonoBehaviour
             // Nếu muốn: click ngắn có thể gọi Increment hoặc không làm gì
             // wheel.Increment();
         }
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) return false;
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+                return true;
+        }
+        return false;
     }
 }

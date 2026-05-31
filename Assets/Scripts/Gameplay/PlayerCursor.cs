@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.EventSystems;
 
 public class PlayerCursor : MonoBehaviour
 {
@@ -11,6 +11,20 @@ public class PlayerCursor : MonoBehaviour
 
     void Update()
     {
+        // 1. Chặn mọi tương tác khi popup Settings đang mở
+        if (SettingsPopupController.IsOpen)
+        {
+            Cursor.SetCursor(defaultCursor, Vector2.zero, CursorMode.Auto);
+            return;
+        }
+
+        // 2. Chặn tương tác khi chuột/touch đang đè lên các phần tử UI khác (Inventory, HUD...)
+        if (IsPointerOverUI())
+        {
+            Cursor.SetCursor(defaultCursor, Vector2.zero, CursorMode.Auto);
+            return;
+        }
+
         Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 mousePos2D = new Vector2(mouseWorld.x, mouseWorld.y);
 
@@ -52,5 +66,19 @@ public class PlayerCursor : MonoBehaviour
                 InventoryUI.Instance?.Deselect();
             }
         }
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) return false;
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+        
+        // Touch support
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+                return true;
+        }
+        return false;
     }
 }

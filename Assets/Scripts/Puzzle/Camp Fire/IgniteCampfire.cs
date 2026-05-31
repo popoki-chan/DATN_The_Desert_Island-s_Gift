@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [RequireComponent(typeof(Interactable))]
 public class IgniteCampfire : MonoBehaviour
@@ -18,6 +18,9 @@ public class IgniteCampfire : MonoBehaviour
     [Header("Đồng bộ Logic")]
     [Tooltip("Nếu đống củi ngoài bãi biển cũng có script Interactable, kéo nó vào đây để mở khóa luôn")]
     public Interactable mainViewInteractable;
+
+    [Header("Sự kiện hoàn thành (Tùy chọn)")]
+    public UnityEngine.Events.UnityEvent onFireLit;
 
     private Interactable coreLogic;
 
@@ -59,6 +62,7 @@ public class IgniteCampfire : MonoBehaviour
         }
 
         Debug.Log("<color=orange>[IgniteCampfire]</color> Đã nhóm lửa và đồng bộ tất cả các View!");
+        onFireLit?.Invoke();
         this.enabled = false;
     }
 }

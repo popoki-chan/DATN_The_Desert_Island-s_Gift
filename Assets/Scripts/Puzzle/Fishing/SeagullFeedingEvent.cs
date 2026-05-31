@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using DG.Tweening;
 
 [RequireComponent(typeof(Interactable))]
@@ -10,6 +10,10 @@ public class SeagullFeedingEvent : MonoBehaviour
     [Header("2. Các Object Đồ họa tham chiếu")]
     public GameObject fishOnRockVisual;
     public Transform seagullTransform;
+    [Tooltip("Điểm neo ở mỏ hải âu để cắp cá đi. Nếu để trống sẽ cắp ở tâm.")]
+    public Transform fishHoldPoint;
+    [Tooltip("Sprite Hải âu khi bay")]
+    public Sprite flyingSprite;
 
     [Header("3. Cài đặt Tọa độ Di chuyển (DOTween)")]
     public Transform eatPoint;
@@ -27,10 +31,20 @@ public class SeagullFeedingEvent : MonoBehaviour
     public float poopFallDuration = 0.4f;
 
     private Interactable coreLogic;
+    private SpriteRenderer seagullSpriteRenderer;
+    private Sprite originalSprite;
 
     void Awake()
     {
         coreLogic = GetComponent<Interactable>();
+        if (seagullTransform != null)
+        {
+            seagullSpriteRenderer = seagullTransform.GetComponent<SpriteRenderer>();
+            if (seagullSpriteRenderer != null)
+            {
+                originalSprite = seagullSpriteRenderer.sprite;
+            }
+        }
     }
 
     void Start()
@@ -61,27 +75,54 @@ public class SeagullFeedingEvent : MonoBehaviour
 
         if (seagullTransform != null && eatPoint != null && flyAwayPoint != null)
         {
+            // Bắt đầu bay xuống: chuyển sang sprite bay
+            if (seagullSpriteRenderer != null && flyingSprite != null)
+            {
+                seagullSpriteRenderer.sprite = flyingSprite;
+            }
+
             seagullTransform.gameObject.SetActive(true);
             Sequence seagullSequence = DOTween.Sequence();
 
             seagullSequence.Append(seagullTransform.DOMove(eatPoint.position, flyDownDuration).SetEase(Ease.OutQuad));
 
+            // Đáp xuống ăn: chuyển sang sprite đứng
             seagullSequence.AppendCallback(() => {
+                if (seagullSpriteRenderer != null)
+                {
+                    seagullSpriteRenderer.sprite = originalSprite;
+                }
                 seagullTransform.DOShakePosition(eatDuration, new Vector3(0.05f, 0.1f, 0f), 5, 90f);
             });
             seagullSequence.AppendInterval(eatDuration);
 
+            // Bắt đầu cắp cá bay đi: chuyển sang sprite bay
             seagullSequence.AppendCallback(() => {
+                if (seagullSpriteRenderer != null && flyingSprite != null)
+                {
+                    seagullSpriteRenderer.sprite = flyingSprite;
+                }
                 if (fishOnRockVisual != null)
                 {
-                    fishOnRockVisual.transform.DOScale(Vector3.zero, 0.2f).OnComplete(() => fishOnRockVisual.SetActive(false));
+                    Transform parentTransform = fishHoldPoint != null ? fishHoldPoint : seagullTransform;
+                    if (parentTransform != null)
+                    {
+                        fishOnRockVisual.transform.SetParent(parentTransform);
+                        fishOnRockVisual.transform.localPosition = Vector3.zero;
+                        fishOnRockVisual.transform.localRotation = Quaternion.identity;
+                        fishOnRockVisual.transform.localScale = Vector3.one;
+                    }
                 }
             });
 
             seagullSequence.Append(seagullTransform.DOMove(flyAwayPoint.position, flyAwayDuration).SetEase(Ease.InQuad));
 
-            // BƯỚC THẢ CỨT
+            // Hoàn thành: trả lại sprite đứng mặc định và ẩn đi
             seagullSequence.OnComplete(() => {
+                if (seagullSpriteRenderer != null)
+                {
+                    seagullSpriteRenderer.sprite = originalSprite;
+                }
                 seagullTransform.gameObject.SetActive(false);
 
                 if (mapPoopObject != null && eatPoint != null)
@@ -99,6 +140,22 @@ public class SeagullFeedingEvent : MonoBehaviour
                         });
                 }
             });
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (coreLogic != null)
+        {
+            coreLogic.OnDefaultInteract -= HandleFishPlaced;
+        }
+        if (seagullTransform != null)
+        {
+            seagullTransform.DOKill();
+        }
+        if (mapPoopObject != null)
+        {
+            mapPoopObject.transform.DOKill();
         }
     }
 }

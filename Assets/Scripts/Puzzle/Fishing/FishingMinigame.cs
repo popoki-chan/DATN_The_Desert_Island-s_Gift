@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 using DG.Tweening;
+using UnityEngine.EventSystems;
 
 public class FishingMinigame : MonoBehaviour
 {
@@ -23,6 +24,7 @@ public class FishingMinigame : MonoBehaviour
     private bool canShoot = false;
     private bool isGameFinished = false;
     private Vector3 spearOriginalPos;
+    private Tween delayedCallTween;
 
     void Start()
     {
@@ -35,20 +37,42 @@ public class FishingMinigame : MonoBehaviour
         isGameFinished = false;
         canShoot = false; // Khóa bắn tạm thời
 
+        delayedCallTween?.Kill();
         // Dùng DOTween để delay khoảng 0.15 giây (hoặc qua vài khung hình) 
         // Sau khi cú click đưa lao của người chơi đã trôi qua hoàn toàn, mới mở khóa canShoot
-        DOVirtual.DelayedCall(0.15f, () =>
+        delayedCallTween = DOVirtual.DelayedCall(0.15f, () =>
         {
             canShoot = true;
             Debug.Log("<color=yellow>[FishingMinigame]</color> Hệ thống phóng lao đã sẵn sàng nhận lệnh click mới!");
         });
     }
 
+    void OnDisable()
+    {
+        delayedCallTween?.Kill();
+        if (spearVisual != null)
+        {
+            spearVisual.DOKill();
+        }
+    }
+
+    void OnDestroy()
+    {
+        delayedCallTween?.Kill();
+        if (spearVisual != null)
+        {
+            spearVisual.DOKill();
+        }
+    }
+
     void Update()
     {
+        if (SettingsPopupController.IsOpen) return;
+
         // Hệ thống chỉ nhận lệnh nếu canShoot đã được mở khóa ở hàm OnEnable trên
         if (Input.GetMouseButtonDown(0) && canShoot && !isGameFinished)
         {
+            if (IsPointerOverUI()) return;
             HandleFishingThrust();
         }
     }
@@ -135,5 +159,17 @@ public class FishingMinigame : MonoBehaviour
             if (!isGameFinished) canShoot = true;
             onComplete?.Invoke();
         }
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) return false;
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+                return true;
+        }
+        return false;
     }
 }

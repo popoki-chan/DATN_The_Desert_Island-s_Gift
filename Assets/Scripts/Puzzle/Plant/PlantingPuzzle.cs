@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using DG.Tweening;
 
 [RequireComponent(typeof(Interactable), typeof(SpriteRenderer))]
@@ -19,6 +19,11 @@ public class PlantingPuzzle : MonoBehaviour
     [Tooltip("Object Mầm cây con (Mọc lên SAU KHI tưới nước)")]
     public GameObject seedlingVisual;
 
+    [Header("2b. Đồ họa thu nhỏ (Inside Island Visuals)")]
+    public GameObject mapDirtMoundVisual;
+    public GameObject mapPlacedSeedVisual;
+    public GameObject mapSeedlingVisual;
+
     [Header("3. Tinh chỉnh Hoạt ảnh Đào (Offsets)")]
     public float leftOffset = 0.3f;
     public float downOffset = 0.2f;
@@ -34,6 +39,10 @@ public class PlantingPuzzle : MonoBehaviour
     public float dragDuration = 0.3f;
     public float resetDuration = 0.2f;
 
+    [Header("6. Sự kiện hoàn thành (Tùy chọn)")]
+    public UnityEngine.Events.UnityEvent onPlantingCompleted;
+    public CutscenePlayer cutscenePlayer;
+
     private Interactable interactable;
     private int puzzleStep = 0; // 0: Cát phẳng, 1: Ụ đất, 2: Hạt nằm trên đất, 3: Nảy mầm
 
@@ -48,6 +57,10 @@ public class PlantingPuzzle : MonoBehaviour
         if (toolDiggingVisual != null) toolDiggingVisual.SetActive(false);
         if (placedSeedVisual != null) placedSeedVisual.SetActive(false);
         if (seedlingVisual != null) seedlingVisual.SetActive(false);
+
+        if (mapDirtMoundVisual != null) mapDirtMoundVisual.transform.localScale = Vector3.zero;
+        if (mapPlacedSeedVisual != null) mapPlacedSeedVisual.SetActive(false);
+        if (mapSeedlingVisual != null) mapSeedlingVisual.SetActive(false);
 
         interactable.requiredItemId = digToolId;
         interactable.isLocked = true;
@@ -87,6 +100,10 @@ public class PlantingPuzzle : MonoBehaviour
                     {
                         digSequence.Join(dirtMoundVisual.transform.DOScale(new Vector3(currentDirtScale, currentDirtScale, 1f), dragDuration).SetEase(Ease.OutBack));
                     }
+                    if (mapDirtMoundVisual != null)
+                    {
+                        digSequence.Join(mapDirtMoundVisual.transform.DOScale(new Vector3(currentDirtScale, currentDirtScale, 1f), dragDuration).SetEase(Ease.OutBack));
+                    }
 
                     digSequence.Append(toolDiggingVisual.transform.DOLocalMove(toolStartPos, resetDuration).SetEase(Ease.OutQuad));
                     digSequence.Join(toolDiggingVisual.transform.DOLocalRotate(toolStartRot, resetDuration));
@@ -112,6 +129,11 @@ public class PlantingPuzzle : MonoBehaviour
                 // Hiệu ứng hạt giống rơi nhẹ xuống đất (Dùng OutBounce cho nảy nảy)
                 placedSeedVisual.transform.DOLocalMoveY(0.2f, 0.4f).From().SetRelative(true).SetEase(Ease.OutBounce);
             }
+            if (mapPlacedSeedVisual != null)
+            {
+                mapPlacedSeedVisual.SetActive(true);
+                mapPlacedSeedVisual.transform.DOLocalMoveY(0.2f, 0.4f).From().SetRelative(true).SetEase(Ease.OutBounce);
+            }
 
             interactable.requiredItemId = waterItemId;
             interactable.isLocked = true;
@@ -131,12 +153,22 @@ public class PlantingPuzzle : MonoBehaviour
                 growSequence.Append(placedSeedVisual.transform.DOScale(Vector3.zero, 0.2f));
                 growSequence.AppendCallback(() => placedSeedVisual.SetActive(false));
             }
+            if (mapPlacedSeedVisual != null)
+            {
+                growSequence.Join(mapPlacedSeedVisual.transform.DOScale(Vector3.zero, 0.2f));
+                growSequence.AppendCallback(() => mapPlacedSeedVisual.SetActive(false));
+            }
 
             // 2. Mầm non búng lên từ dưới đất
             if (seedlingVisual != null)
             {
                 growSequence.AppendCallback(() => seedlingVisual.SetActive(true));
                 growSequence.Append(seedlingVisual.transform.DOScale(Vector3.zero, 0.5f).From().SetEase(Ease.OutBack));
+            }
+            if (mapSeedlingVisual != null)
+            {
+                growSequence.AppendCallback(() => mapSeedlingVisual.SetActive(true));
+                growSequence.Join(mapSeedlingVisual.transform.DOScale(Vector3.zero, 0.5f).From().SetEase(Ease.OutBack));
             }
 
             growSequence.OnComplete(() => {
@@ -145,6 +177,11 @@ public class PlantingPuzzle : MonoBehaviour
                 interactable.isLocked = false;
                 interactable.description = "Một mầm non xanh tươi! Phép màu của sự sống là đây.";
                 interactable.OnDefaultInteract -= HandleInteraction;
+                onPlantingCompleted?.Invoke();
+                if (cutscenePlayer != null)
+                {
+                    cutscenePlayer.PlayCutscene();
+                }
             });
         }
     }
@@ -155,5 +192,9 @@ public class PlantingPuzzle : MonoBehaviour
         if (dirtMoundVisual != null) dirtMoundVisual.transform.DOKill();
         if (placedSeedVisual != null) placedSeedVisual.transform.DOKill();
         if (seedlingVisual != null) seedlingVisual.transform.DOKill();
+
+        if (mapDirtMoundVisual != null) mapDirtMoundVisual.transform.DOKill();
+        if (mapPlacedSeedVisual != null) mapPlacedSeedVisual.transform.DOKill();
+        if (mapSeedlingVisual != null) mapSeedlingVisual.transform.DOKill();
     }
 }

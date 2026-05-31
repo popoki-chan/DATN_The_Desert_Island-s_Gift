@@ -1,11 +1,11 @@
 using UnityEngine;
 using DG.Tweening;
 
-[RequireComponent(typeof(Interactable))]
 public class PopupBubble : MonoBehaviour
 {
     public GameObject dotSmallVisual, dotLargeVisual, contentVisual;
     public float showDuration = 3.0f, dotPopTime = 0.2f, expandTime = 0.4f;
+    public bool playOnDefaultInteract = true;
 
     private Sequence currentSequence;
     private Interactable interactable;
@@ -15,14 +15,19 @@ public class PopupBubble : MonoBehaviour
         interactable = GetComponent<Interactable>();
     }
 
+    void Start()
+    {
+        Hide();
+    }
+
     void OnEnable()
     {
-        if (interactable != null) interactable.OnDefaultInteract += PlayAnimation;
+        if (playOnDefaultInteract && interactable != null) interactable.OnDefaultInteract += PlayAnimation;
     }
 
     void OnDisable()
     {
-        if (interactable != null) interactable.OnDefaultInteract -= PlayAnimation;
+        if (playOnDefaultInteract && interactable != null) interactable.OnDefaultInteract -= PlayAnimation;
         if (currentSequence != null) currentSequence.Kill();
     }
 

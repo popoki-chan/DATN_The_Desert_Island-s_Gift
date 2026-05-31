@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using DG.Tweening;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(RawImage), typeof(Collider2D))]
 public class FruitCarver : MonoBehaviour
@@ -58,15 +59,37 @@ public class FruitCarver : MonoBehaviour
             handVisual.localEulerAngles = new Vector3(0, 0, defaultHandRotation);
         }
 
+        // Tự động lấy texture từ RawImage nếu originalFruitTexture chưa được kéo vào Inspector
+        if (originalFruitTexture == null && rawImage != null)
+        {
+            originalFruitTexture = rawImage.texture as Texture2D;
+        }
+
         if (originalFruitTexture == null) return;
 
-        carvingCopy = new Texture2D(originalFruitTexture.width, originalFruitTexture.height, originalFruitTexture.format, false);
-        Graphics.CopyTexture(originalFruitTexture, carvingCopy);
+        // Tạo bản copy kiểu RGBA32 để luôn cho phép gọi SetPixel (kể cả khi texture gốc bị nén)
+        carvingCopy = new Texture2D(originalFruitTexture.width, originalFruitTexture.height, TextureFormat.RGBA32, false);
+        
+        try
+        {
+            carvingCopy.SetPixels(originalFruitTexture.GetPixels());
+            carvingCopy.Apply();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("<color=red>[FruitCarver]</color> Không thể sao chép điểm ảnh của texture. " +
+                           "Hãy chắc chắn đã bật 'Read/Write' trong settings của ảnh gốc: " + originalFruitTexture.name + ". Lỗi: " + e.Message);
+            // Fallback bằng cách dùng trực tiếp để tránh sập game, mặc dù có thể không vẽ được
+            Graphics.CopyTexture(originalFruitTexture, carvingCopy);
+        }
+        
         rawImage.texture = carvingCopy;
     }
 
     void Update()
     {
+        if (SettingsPopupController.IsOpen) return;
+
         UpdateHandVisualPosition();
 
         if (!isReadyToDraw)
@@ -94,6 +117,9 @@ public class FruitCarver : MonoBehaviour
             // Trường hợp 2: Bấm ra ngoài cái quả -> ĐÓNG VIEW
             else
             {
+                // Nếu bấm ra ngoài nhưng trúng các phần tử UI khác (như nút Settings, túi đồ), không được tự ý đóng view!
+                if (IsPointerOverUI()) return;
+
                 SubmitCarving();
             }
         }
@@ -239,5 +265,29 @@ public class FruitCarver : MonoBehaviour
 
         // Kích hoạt các sự kiện phụ
         onCarvingFinished?.Invoke();
+    }
+
+    void OnDestroy()
+    {
+        if (handVisual != null)
+        {
+            handVisual.DOKill();
+        }
+        if (carvingCopy != null)
+        {
+            Destroy(carvingCopy);
+        }
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) return false;
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+                return true;
+        }
+        return false;
     }
 }

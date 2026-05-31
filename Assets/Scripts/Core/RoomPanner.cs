@@ -1,6 +1,7 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class RoomPanner : MonoBehaviour
 {
@@ -46,8 +47,15 @@ public class RoomPanner : MonoBehaviour
 
     private void HandleInput()
     {
+        if (SettingsPopupController.IsOpen)
+        {
+            isDragging = false;
+            return;
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
+            if (IsPointerOverUI()) return;
             dragOrigin = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             isDragging = true;
             targetPos = transform.position; // Reset target về vị trí hiện tại khi bắt đầu kéo mới
@@ -91,5 +99,17 @@ public class RoomPanner : MonoBehaviour
 
         if (rightArrow != null)
             rightArrow.SetActive(transform.position.x > minX + 0.1f);
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) return false;
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+                return true;
+        }
+        return false;
     }
 }
