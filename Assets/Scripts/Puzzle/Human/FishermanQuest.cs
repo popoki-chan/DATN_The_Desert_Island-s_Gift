@@ -4,57 +4,88 @@
 public class FishermanQuest : MonoBehaviour
 {
     [Header("1. Yêu cầu vật phẩm")]
-    [Tooltip("ID của Cành cây nhọn (VD: sharp_bough)")]
     public string spearItemId = "sharp_bough";
 
-    [Header("2. Bật/Tắt Hình ảnh (GameObjects)")]
-    public GameObject humanIdleVisual;       // Hình người đứng không
-    public GameObject humanWithSpearVisual;  // Hình người cầm lao
+    [Header("2. Bật/Tắt Hình ảnh Nhân vật (Góc nhìn cũ)")]
+    public GameObject humanIdleVisual;
+    public GameObject humanWithSpearVisual;
 
-    [Header("3. Khu vực Bắt cá")]
-    [Tooltip("Kéo Object vùng click để mở View Bắt Cá (đang bị tàng hình) vào đây")]
-    public GameObject fishingInteractArea;
+    [Header("3. Chuyển thẳng sang View Bắt Cá")]
+    public GameObject fishingView;
 
     private Interactable coreLogic;
+    private bool isQuestCompleted = false; // BÚA TẠ KHÓA LLogic: Đã hoàn thành bắt cá hoàn toàn chưa?
 
     void Awake()
     {
         coreLogic = GetComponent<Interactable>();
     }
 
-    // --- HÀM NÀY SẼ ĐƯỢC GỌI KHI BƯỚC CHẾ TẠO TRƯỚC ĐÓ HOÀN THÀNH ---
     public void StartFishingPhase()
     {
-        // 1. Reset đồ họa: Bật hình ban đầu, tắt các hình khác
+        isQuestCompleted = false; // Reset trạng thái khi bắt đầu pha đòi lao
+
         if (humanIdleVisual != null) humanIdleVisual.SetActive(true);
         if (humanWithSpearVisual != null) humanWithSpearVisual.SetActive(false);
 
-        // Đảm bảo khu bắt cá vẫn đang bị khóa (tàng hình)
-        if (fishingInteractArea != null) fishingInteractArea.SetActive(false);
-
-        // 2. Bắt đầu đòi người chơi đưa Cành cây nhọn
         coreLogic.requiredItemId = spearItemId;
         coreLogic.isLocked = true;
 
-        // 3. Lắng nghe cú click chuột tiếp theo
-        coreLogic.OnDefaultInteract += ReceiveSpear;
+        coreLogic.OnDefaultInteract += ReceiveSpearAndSwitchView;
     }
 
-    // --- HÀM NÀY CHẠY KHI NGƯỜI CHƠI ĐƯA CÀNH CÂY NHỌN CHO HUMAN ---
-    private void ReceiveSpear()
+    private void ReceiveSpearAndSwitchView()
     {
-        // 1. Cập nhật đồ họa: Đổi sang hình đang cầm cành cây nhọn
         if (humanIdleVisual != null) humanIdleVisual.SetActive(false);
         if (humanWithSpearVisual != null) humanWithSpearVisual.SetActive(true);
 
-        // 2. MỞ KHÓA VIEW BẮT CÁ (Bật object click lên)
-        if (fishingInteractArea != null) fishingInteractArea.SetActive(true);
+        SwitchToFishingView();
 
-        // 3. Hoàn thành nhiệm vụ của Human (Không đòi gì nữa, khóa nhân vật lại)
         coreLogic.requiredItemId = "";
         coreLogic.isLocked = false;
-        coreLogic.OnDefaultInteract -= ReceiveSpear; // Ngắt lắng nghe để tránh lỗi
 
-        Debug.Log("<color=green>[Fisherman]</color> Đã nhận vũ khí! Mở khóa khu vực bắt cá thành công.");
+        coreLogic.OnDefaultInteract -= ReceiveSpearAndSwitchView;
+        coreLogic.OnDefaultInteract += ReEnterFishingView;
+
+        Debug.Log("<color=green>[FishermanQuest]</color> Đã nhận lao! Mở cổng vào View bắt cá.");
+    }
+
+    private void ReEnterFishingView()
+    {
+        // BIỆN PHÁP CHẶN ĐỨNG: Nếu đã bắt được cá rồi, chặn đứng không cho chuyển view nữa!
+        if (isQuestCompleted)
+        {
+            Debug.Log("[FishermanQuest] Nhiệm vụ đã hoàn thành vĩnh viễn. Chặn click vào lại.");
+            return;
+        }
+
+        Debug.Log("<color=cyan>[FishermanQuest]</color> Vào lại View câu cá do chưa bắt được cá.");
+        SwitchToFishingView();
+    }
+
+    private void SwitchToFishingView()
+    {
+        if (fishingView != null && ViewManager.Instance != null)
+        {
+            ViewManager.Instance.ChangeView(fishingView);
+        }
+    }
+
+    // --- HÀM CHỐT HẠ: ĐƯỢC GỌI KHI BẮT ĐƯỢC CÁ ---
+    public void CompleteQuestAndLockPermanently()
+    {
+        isQuestCompleted = true; // Kích hoạt khóa vĩnh viễn
+
+        if (coreLogic != null)
+        {
+            coreLogic.requiredItemId = "";
+            coreLogic.isLocked = true; // Khóa cứng Interactable gốc của Human lại luôn
+
+            // Hủy đăng ký tất cả các hàm tương tác để ông này hoàn toàn trơ ra
+            coreLogic.OnDefaultInteract -= ReceiveSpearAndSwitchView;
+            coreLogic.OnDefaultInteract -= ReEnterFishingView;
+        }
+
+        Debug.Log("<color=red>[FishermanQuest]</color> CHỐT HẠ: Đã bắt được cá, Human bị khóa tương tác mãi mãi!");
     }
 }

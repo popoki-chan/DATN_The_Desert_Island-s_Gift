@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(Collider2D))]
 public class Interactable : MonoBehaviour
@@ -31,6 +32,10 @@ public class Interactable : MonoBehaviour
 
     void OnMouseDown()
     {
+        // --- THÊM KHIÊN CHỐNG XUYÊN CLICK VÀO NGAY ĐÂY ---
+        // Nếu chuột đang nằm trên UI (như nút bấm, ảnh nền UI), thì cấm không cho chạy tiếp code bên dưới!
+        if (EventSystem.current.IsPointerOverGameObject()) return;
+
         // Báo hiệu click chuột
         OnClicked?.Invoke(this);
 

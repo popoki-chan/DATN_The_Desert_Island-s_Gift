@@ -10,4 +10,5 @@ public class Item : ScriptableObject
     public Sprite icon;
     [TextArea] public string description;
     public bool stackable = false;
+    public int maxUses = 1;
 }

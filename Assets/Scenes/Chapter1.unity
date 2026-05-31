@@ -910,7 +910,7 @@ SpriteRenderer:
   m_Size: {x: 3.84, y: 2.75}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1001 &161787820
@@ -8152,7 +8152,7 @@ PolygonCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
+    pivot: {x: 0.28582633, y: 0.27966303}
     oldSize: {x: 2.6, y: 1.7}
     newSize: {x: 2.6, y: 1.7}
     adaptiveTilingThreshold: 0.5
@@ -10288,6 +10288,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7905859273084063168, guid: ba5d85ef65369b546b4fe999373cdb0a, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8838073767554471550, guid: ba5d85ef65369b546b4fe999373cdb0a, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -11026,9 +11030,17 @@ MonoBehaviour:
   - requiredItemId: coir
     visualNow: {fileID: 1100610783}
     visualOther: {fileID: 631491734}
+    hideVisualNow: {fileID: 0}
+    hideVisualOther: {fileID: 0}
   - requiredItemId: lens
     visualNow: {fileID: 2086698419}
     visualOther: {fileID: 8016524796305171540}
+    hideVisualNow: {fileID: 0}
+    hideVisualOther: {fileID: 0}
+  finalViewToOpen: {fileID: 0}
+  onPuzzleCompleted:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &6053699054700709485
 Transform:
   m_ObjectHideFlags: 0

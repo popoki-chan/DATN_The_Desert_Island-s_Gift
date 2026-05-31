@@ -18,7 +18,7 @@ public class GiveItem : MonoBehaviour
     public bool fadeOutWhileRunning = true;
 
     [Tooltip("Kéo object 'Code' (hoặc các vật giấu kín) đang bị ẩn vào đây để nó hiện ra sau khi bạch tuộc chạy mất")]
-    public GameObject[] objectsToRevealAfterFlee; // <--- TÍNH NĂNG MỚI Ở ĐÂY
+    public GameObject[] objectsToRevealAfterFlee;
 
     [Header("4. Chờ ghép Animation (Spine 2D)")]
     [SpineAnimation]
@@ -71,7 +71,6 @@ public class GiveItem : MonoBehaviour
                 }
                 else
                 {
-                    // Tự động làm mờ tất cả các mảnh của bạch tuộc
                     SpriteRenderer[] allSprites = GetComponentsInChildren<SpriteRenderer>();
                     foreach (var sr in allSprites)
                     {
@@ -80,12 +79,8 @@ public class GiveItem : MonoBehaviour
                 }
             }
 
-            // KHI CHẠY TỚI ĐÍCH (HOÀN THÀNH SEQUENCE)
             runSeq.OnComplete(() =>
             {
-                Debug.Log($"<color=cyan>[GiveItem]</color> {gameObject.name} đã chạy thoát!");
-
-                // --- TUYỆT CHIÊU LỘ DIỆN MẬT MÃ ---
                 if (objectsToRevealAfterFlee != null && objectsToRevealAfterFlee.Length > 0)
                 {
                     foreach (GameObject obj in objectsToRevealAfterFlee)

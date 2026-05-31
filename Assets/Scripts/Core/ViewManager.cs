@@ -59,6 +59,9 @@ public class ViewManager : MonoBehaviour
     {
         if (targetView == null) return;
 
+        // --- THÊM DÒNG NÀY ĐỂ CHẶN LỖI DOUBLE-CLICK VÀO CÙNG 1 VIEW ---
+        if (viewHistory.Count > 0 && viewHistory.Peek() == targetView) return;
+
         // Tắt góc nhìn hiện tại
         viewHistory.Peek().SetActive(false);
 
