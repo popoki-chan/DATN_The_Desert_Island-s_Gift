@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
+using DG.Tweening;
 
 [RequireComponent(typeof(Interactable))]
 public class WaterScoop : MonoBehaviour
@@ -45,8 +46,33 @@ public class WaterScoop : MonoBehaviour
     private IEnumerator ScoopRoutine()
     {
         // 1. CHẠY ANIMATION MÚC NƯỚC
-        if (scoopAnimationObject != null) scoopAnimationObject.SetActive(true);
-        if (coconutAnimator != null) coconutAnimator.SetTrigger(animTriggerName);
+        if (scoopAnimationObject != null)
+        {
+            scoopAnimationObject.SetActive(true);
+            if (coconutAnimator != null)
+            {
+                coconutAnimator.SetTrigger(animTriggerName);
+            }
+            else
+            {
+                // Play programmatic DOTween animation for coconut shell
+                Vector3 originalPos = scoopAnimationObject.transform.localPosition;
+                Vector3 originalRot = scoopAnimationObject.transform.localEulerAngles;
+                
+                Sequence seq = DOTween.Sequence();
+                
+                // Dip down into water and rotate
+                seq.Append(scoopAnimationObject.transform.DOLocalMove(new Vector3(originalPos.x, originalPos.y - 0.7f, originalPos.z), 0.4f).SetEase(Ease.InQuad));
+                seq.Join(scoopAnimationObject.transform.DOLocalRotate(new Vector3(0, 0, 45f), 0.4f).SetEase(Ease.InQuad));
+                
+                // Shake in water (bubbles/scooping effect)
+                seq.Append(scoopAnimationObject.transform.DOShakePosition(0.4f, new Vector3(0.05f, 0.05f, 0f), 10, 90, false, true));
+                
+                // Rise back up and level rotation
+                seq.Append(scoopAnimationObject.transform.DOLocalMove(originalPos, 0.4f).SetEase(Ease.OutQuad));
+                seq.Join(scoopAnimationObject.transform.DOLocalRotate(originalRot, 0.4f).SetEase(Ease.OutQuad));
+            }
+        }
 
         Debug.Log("<color=cyan>[WaterScoop]</color> Đang múc nước...");
 

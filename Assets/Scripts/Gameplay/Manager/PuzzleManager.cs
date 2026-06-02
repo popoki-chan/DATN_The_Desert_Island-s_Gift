@@ -1,16 +1,15 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PuzzleManager : MonoBehaviour
+public class PuzzleManager : Singleton<PuzzleManager>
 {
-    public static PuzzleManager Instance { get; private set; }
     private Dictionary<string, bool> puzzleStates = new Dictionary<string, bool>();
 
-    void Awake()
+    protected override void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        DontDestroyOnLoadEnabled = false;
+        base.Awake();
     }
 
     public void SetState(string key, bool value)

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class ChapterComplete : MonoBehaviour
@@ -7,10 +7,54 @@ public class ChapterComplete : MonoBehaviour
     public int nextChapterToUnlock = 2;
 
     [Tooltip("Tên Scene Menu chính để quay về sau khi thắng")]
-    public int menuSceneName = 0;
+    public string menuSceneName = "MainMenu";
+
+    [Header("Cutscene & Next Chapter Config")]
+    [Tooltip("Cutscene Player chạy khi kết thúc chapter này")]
+    public CutscenePlayer endingCutscenePlayer;
+
+    [Tooltip("Tên Scene của Chapter tiếp theo cần chuyển tới sau khi cutscene kết thúc")]
+    public string nextChapterSceneName;
 
     // Gọi hàm này khi người chơi giải xong câu đố cuối cùng
     public void FinishChapter()
+    {
+        // 1. Thực hiện mở khóa Chapter tiếp theo ngay lập tức để lưu tiến trình phòng trường hợp người chơi tắt game giữa chừng khi đang xem cutscene
+        UnlockNextChapter();
+
+        // 2. Chạy cutscene nếu có
+        if (endingCutscenePlayer != null)
+        {
+            endingCutscenePlayer.loadNextSceneOnComplete = true;
+            
+            // Nếu có chapter tiếp theo thì chuyển tới chapter đó, không thì quay về Menu
+            if (!string.IsNullOrEmpty(nextChapterSceneName))
+            {
+                endingCutscenePlayer.nextSceneName = nextChapterSceneName;
+            }
+            else
+            {
+                endingCutscenePlayer.nextSceneName = menuSceneName;
+            }
+            
+            endingCutscenePlayer.PlayCutscene();
+        }
+        else
+        {
+            // Nếu không có cutscene kết thúc, chuyển thẳng sang scene tiếp theo
+            string targetScene = !string.IsNullOrEmpty(nextChapterSceneName) ? nextChapterSceneName : menuSceneName;
+            if (SceneController.Instance != null)
+            {
+                SceneController.Instance.LoadScene(targetScene);
+            }
+            else
+            {
+                SceneManager.LoadScene(targetScene);
+            }
+        }
+    }
+
+    public void UnlockNextChapter()
     {
         int currentUnlocked = PlayerPrefs.GetInt("UnlockedChapter", 1);
 
@@ -18,11 +62,8 @@ public class ChapterComplete : MonoBehaviour
         if (nextChapterToUnlock > currentUnlocked)
         {
             PlayerPrefs.SetInt("UnlockedChapter", nextChapterToUnlock);
-            PlayerPrefs.Save(); // Lưu thẳng vào ổ cứng máy tính/điện thoại
-            Debug.Log($"<color=green>Chúc mừng! Đã mở khóa Chapter {nextChapterToUnlock}</color>");
+            PlayerPrefs.Save(); // Lưu thẳng vào ổ cứng
+            Debug.Log($"<color=green>[ChapterComplete] Đã mở khóa Chapter {nextChapterToUnlock}</color>");
         }
-
-        // Quay về Menu để người chơi chọn chap mới
-        SceneManager.LoadScene(menuSceneName);
     }
 }

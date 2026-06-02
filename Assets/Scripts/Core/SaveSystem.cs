@@ -13,16 +13,9 @@ public class SaveData
     public List<string> solvedPuzzles = new List<string>();
 }
 
-public class SaveSystem : MonoBehaviour
+public class SaveSystem : Singleton<SaveSystem>
 {
-    public static SaveSystem Instance { get; private set; }
     private string saveFile => Path.Combine(Application.persistentDataPath, "save.json");
-
-    void Awake()
-    {
-        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
-        else Destroy(gameObject);
-    }
 
     public void SaveGame()
     {

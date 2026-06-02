@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class TooltipUI : MonoBehaviour
+public class TooltipUI : Singleton<TooltipUI>
 {
-    public static TooltipUI Instance { get; private set; }
     public GameObject tooltipRoot;
     public TextMeshProUGUI text;
     public Vector2 offset = new Vector2(10, -10);
 
-    void Awake()
+    protected override void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
-        Hide();
+        DontDestroyOnLoadEnabled = false;
+        base.Awake();
+        if (Instance == this)
+        {
+            Hide();
+        }
     }
 
     void Update()

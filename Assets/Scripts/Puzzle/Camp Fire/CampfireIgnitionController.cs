@@ -31,6 +31,7 @@ public class CampfireIgnitionController : MonoBehaviour
 
     private Sprite generatedGlowSprite;
     private Sprite generatedSmokeSprite;
+    private Vector3 originalLensScale = Vector3.one;
 
     private void Awake()
     {
@@ -42,8 +43,31 @@ public class CampfireIgnitionController : MonoBehaviour
         if (smokeRenderer1 != null) smokeRenderer1.sprite = generatedSmokeSprite;
         if (smokeRenderer2 != null) smokeRenderer2.sprite = generatedSmokeSprite;
 
+        // Cache original scale and activate parent to ensure rendering works
+        if (lensRenderer != null)
+        {
+            originalLensScale = lensRenderer.transform.localScale;
+            if (lensRenderer.transform.parent != null && lensRenderer.transform.parent != transform)
+            {
+                lensRenderer.transform.parent.gameObject.SetActive(true);
+            }
+        }
+
         // Hide anim objects on start
         ResetVisuals();
+
+        // Wire up ignition animation to the lens step in multiStepPuzzle
+        if (multiStepPuzzle != null && multiStepPuzzle.steps != null)
+        {
+            foreach (var step in multiStepPuzzle.steps)
+            {
+                if (step.requiredItemId == "lens")
+                {
+                    step.onStepActivated.RemoveListener(PlayIgnitionAnimation);
+                    step.onStepActivated.AddListener(PlayIgnitionAnimation);
+                }
+            }
+        }
     }
 
     private void ResetVisuals()
@@ -85,7 +109,7 @@ public class CampfireIgnitionController : MonoBehaviour
             lensRenderer.gameObject.SetActive(true);
 
             seq.Append(lensRenderer.transform.DOMove(targetLensPos, lensSpawnDuration).SetEase(Ease.OutBack));
-            seq.Join(lensRenderer.transform.DOScale(1f, lensSpawnDuration).SetEase(Ease.OutBack));
+            seq.Join(lensRenderer.transform.DOScale(originalLensScale, lensSpawnDuration).SetEase(Ease.OutBack));
             seq.Join(lensRenderer.DOFade(1f, lensSpawnDuration));
 
             if (lensPlaceSfx != null && AudioManager.Instance != null)
@@ -228,6 +252,18 @@ public class CampfireIgnitionController : MonoBehaviour
         if (generatedSmokeSprite != null && generatedSmokeSprite.texture != null)
         {
             Destroy(generatedSmokeSprite.texture);
+        }
+
+        // Cleanup listener
+        if (multiStepPuzzle != null && multiStepPuzzle.steps != null)
+        {
+            foreach (var step in multiStepPuzzle.steps)
+            {
+                if (step.requiredItemId == "lens")
+                {
+                    step.onStepActivated.RemoveListener(PlayIgnitionAnimation);
+                }
+            }
         }
     }
 }

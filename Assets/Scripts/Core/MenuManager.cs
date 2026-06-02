@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
@@ -21,6 +21,8 @@ public class MenuManager : MonoBehaviour
         // Khi mới vào game, chắc chắn hiển thị Start Panel, ẩn Chapter Panel
         startPanel.SetActive(true);
         chapterPanel.SetActive(false);
+
+        CheckUnlockedChapters(); // Thiết lập trạng thái các nút ngay từ đầu
     }
 
     // Gắn hàm này vào sự kiện OnClick của nút "Play"
@@ -29,7 +31,7 @@ public class MenuManager : MonoBehaviour
         startPanel.SetActive(false);
         chapterPanel.SetActive(true);
 
-        CheckUnlockedChapters(); // Bắt đầu kiểm tra ổ khóa
+        CheckUnlockedChapters(); // Bắt đầu kiểm tra lại ổ khóa
     }
 
     private void CheckUnlockedChapters()
@@ -39,18 +41,17 @@ public class MenuManager : MonoBehaviour
 
         for (int i = 0; i < chapterButtons.Length; i++)
         {
-            // i là index (0, 1, 2). Chapter tương ứng là i + 1 (1, 2, 3)
-            if (i + 1 <= unlockedLevel)
+            bool isUnlocked = (i + 1 <= unlockedLevel);
+            
+            // Cập nhật tương tác nút
+            chapterButtons[i].interactable = isUnlocked;
+
+            // Cập nhật ẩn/hiện GameObject lock tương ứng.
+            // Hỗ trợ cả trường hợp mảng lockIcons có 2 phần tử (cho Chap 2 và 3) và 3 phần tử (cho cả 3 Chap).
+            int lockIndex = (lockIcons.Length == chapterButtons.Length - 1) ? i - 1 : i;
+            if (lockIndex >= 0 && lockIcons.Length > lockIndex && lockIcons[lockIndex] != null) 
             {
-                // ĐÃ MỞ KHÓA
-                chapterButtons[i].interactable = true;
-                if (lockIcons.Length > i && lockIcons[i] != null) lockIcons[i].SetActive(false); // Tắt ổ khóa
-            }
-            else
-            {
-                // BỊ KHÓA
-                chapterButtons[i].interactable = false;
-                if (lockIcons.Length > i && lockIcons[i] != null) lockIcons[i].SetActive(true);  // Hiện ổ khóa
+                lockIcons[lockIndex].SetActive(!isUnlocked); // Hiện lock khi bị khóa, ẩn khi mở khóa
             }
         }
     }
@@ -58,13 +59,21 @@ public class MenuManager : MonoBehaviour
     // Gắn hàm này vào từng nút Chapter, truyền tên Scene của Chapter đó vào
     public void LoadChapter(int sceneIndex)
     {
-        SceneManager.LoadScene(sceneIndex);
+        if (SceneController.Instance != null)
+        {
+            SceneController.Instance.LoadScene(sceneIndex);
+        }
+        else
+        {
+            SceneManager.LoadScene(sceneIndex);
+        }
     }
 
     // Nút dùng để test (Xóa dữ liệu chơi lại từ đầu)
     public void ResetProgress()
     {
         PlayerPrefs.DeleteKey("UnlockedChapter");
+        PlayerPrefs.Save();
         CheckUnlockedChapters();
         Debug.Log("<color=red>Đã xóa toàn bộ dữ liệu Chapter!</color>");
     }

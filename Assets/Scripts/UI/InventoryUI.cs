@@ -1,12 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InventoryUI : MonoBehaviour
+public class InventoryUI : Singleton<InventoryUI>
 {
-    public static InventoryUI Instance { get; private set; }
-
     [Header("UI Cài đặt")]
     public Transform gridParent;
 
@@ -23,10 +21,10 @@ public class InventoryUI : MonoBehaviour
     // Mảng lưu trữ 6 slot cố định
     private GameObject[] allSlots;
 
-    void Awake()
+    protected override void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        DontDestroyOnLoadEnabled = false;
+        base.Awake();
     }
 
     void Start()
@@ -61,7 +59,7 @@ public class InventoryUI : MonoBehaviour
         }
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
         if (Inventory.Instance != null)
         {
@@ -70,6 +68,7 @@ public class InventoryUI : MonoBehaviour
             Inventory.Instance.OnInventoryChanged -= RefreshAll;
             Inventory.Instance.OnItemSelected -= HandleItemSelected;
         }
+        base.OnDestroy();
     }
 
     void OnItemAdded(Item item) => AddSlot(item);

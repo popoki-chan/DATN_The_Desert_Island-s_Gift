@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Inventory : MonoBehaviour
+public class Inventory : Singleton<Inventory>
 {
-    public static Inventory Instance { get; private set; }
     public List<Item> items = new List<Item>();
 
     public event Action<Item> OnItemAdded;
@@ -15,10 +14,10 @@ public class Inventory : MonoBehaviour
     private Dictionary<Item, int> itemDurability = new Dictionary<Item, int>();
     public Item currentSelectedItem { get; private set; }
 
-    void Awake()
+    protected override void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        DontDestroyOnLoadEnabled = false;
+        base.Awake();
     }
 
     public void SelectItem(Item item)

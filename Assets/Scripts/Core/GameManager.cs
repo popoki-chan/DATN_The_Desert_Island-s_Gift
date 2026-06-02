@@ -2,10 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManager : Singleton<GameManager>
 {
-    public static GameManager Instance { get; private set; }
-
     [Header("Core Systems (assign prefabs or scene objects)")]
     public Inventory inventory;
     public PuzzleManager puzzleManager;
@@ -14,17 +12,12 @@ public class GameManager : MonoBehaviour
     public SaveSystem saveSystem;
     
 
-    void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
+        base.Awake();
+        if (Instance == this)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
             EnsureReferences();
-        }
-        else
-        {
-            Destroy(gameObject);
         }
     }
 
@@ -45,12 +38,35 @@ public class GameManager : MonoBehaviour
         if (audioManager == null) audioManager = FindObjectOfType<AudioManager>();
         if (sceneController == null) sceneController = FindObjectOfType<SceneController>();
         if (saveSystem == null) saveSystem = FindObjectOfType<SaveSystem>();
+
+        BindSettingsButton();
+    }
+
+    private void BindSettingsButton()
+    {
+        var btnGo = GameObject.Find("Btn Setting");
+        if (btnGo != null)
+        {
+            var btn = btnGo.GetComponent<UnityEngine.UI.Button>();
+            var popupController = Resources.FindObjectsOfTypeAll<SettingsPopupController>();
+            if (btn != null && popupController.Length > 0)
+            {
+                var controller = popupController[0];
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(controller.Open);
+                Debug.Log("<color=green>[GameManager] Dynamically bound settings button to SettingsPopupController.Open()</color>");
+            }
+        }
     }
 
     private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
     {
         if (Instance != this) return;
 
+        BindSettingsButton();
+
+        // Tự động mở khóa Chapter tương ứng với scene đang chơi.
+        // Đảm bảo nếu người chơi thoát game khi đang chơi dở màn 2, khi quay lại menu chính Chapter 2 đã được mở khóa.
         string sceneName = scene.name;
         if (sceneName.StartsWith("Chapter"))
         {

@@ -2,10 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AudioManager : MonoBehaviour
+public class AudioManager : Singleton<AudioManager>
 {
-    public static AudioManager Instance { get; private set; }
-
     [Header("Sources")]
     public AudioSource musicSource;
     public AudioSource sfxSource;
@@ -13,12 +11,6 @@ public class AudioManager : MonoBehaviour
     [Header("Settings")]
     public float musicVolume = 0.7f;
     public float sfxVolume = 1f;
-
-    void Awake()
-    {
-        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
-        else Destroy(gameObject);
-    }
 
     void Start()
     {

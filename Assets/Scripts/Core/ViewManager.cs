@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ViewManager : MonoBehaviour
+public class ViewManager : Singleton<ViewManager>
 {
-    public static ViewManager Instance { get; private set; }
-
     [Header("Cài đặt View (Góc nhìn)")]
     [Tooltip("Góc nhìn tổng của căn phòng lúc mới vào game")]
     public GameObject mainView;
@@ -24,10 +23,10 @@ public class ViewManager : MonoBehaviour
     // Dùng Stack (ngăn xếp) để nhớ lịch sử zoom. Bấm Back sẽ lùi lại đúng 1 bước.
     private Stack<GameObject> viewHistory = new Stack<GameObject>();
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        DontDestroyOnLoadEnabled = false;
+        base.Awake();
     }
 
     private void Start()
@@ -58,45 +57,16 @@ public class ViewManager : MonoBehaviour
     public void ChangeView(GameObject targetView)
     {
         if (targetView == null) return;
-
-        // --- THÊM DÒNG NÀY ĐỂ CHẶN LỖI DOUBLE-CLICK VÀO CÙNG 1 VIEW ---
         if (viewHistory.Count > 0 && viewHistory.Peek() == targetView) return;
 
-        // Tắt góc nhìn hiện tại
-        viewHistory.Peek().SetActive(false);
-
-        // Bật góc nhìn mới và đưa vào ngăn xếp lịch sử
-        targetView.SetActive(true);
-        viewHistory.Push(targetView);
-
-        // Hiện nút Back
-        backButton.gameObject.SetActive(true);
-
-        // Ẩn/Hiện mũi tên trái phải tùy theo góc nhìn mới
-        UpdateArrowsVisibility();
+        StartCoroutine(TransitionToView(targetView));
     }
 
     public void GoBack()
     {
-        // Chỉ cho phép lùi nếu trong lịch sử có nhiều hơn 1 view (nghĩa là không phải mainView)
         if (viewHistory.Count > 1)
         {
-            // Lấy view hiện tại ra khỏi lịch sử và tắt nó đi
-            GameObject currentView = viewHistory.Pop();
-            currentView.SetActive(false);
-
-            // Bật lại view trước đó
-            GameObject previousView = viewHistory.Peek();
-            previousView.SetActive(true);
-
-            // Nếu lùi về đến mainView rồi thì giấu nút Back đi
-            if (viewHistory.Count == 1)
-            {
-                backButton.gameObject.SetActive(false);
-            }
-
-            // Ẩn/Hiện mũi tên trái phải khi lùi ra
-            UpdateArrowsVisibility();
+            StartCoroutine(TransitionBack());
         }
     }
 
@@ -109,5 +79,73 @@ public class ViewManager : MonoBehaviour
         // Nếu đang ở Main View -> Hiện mũi tên. Bất kỳ View nào khác -> Ẩn mũi tên.
         if (leftArrowButton != null) leftArrowButton.SetActive(isAtMainRoom);
         if (rightArrowButton != null) rightArrowButton.SetActive(isAtMainRoom);
+    }
+
+    private IEnumerator TransitionToView(GameObject targetView)
+    {
+        float duration = 0.15f;
+        
+        // 1. Fade out (làm tối màn hình)
+        if (SceneController.Instance != null)
+        {
+            SceneController.Instance.FadeTo(1f, duration);
+            yield return new WaitForSeconds(duration);
+        }
+
+        // 2. Chuyển đổi trạng thái View khi màn hình tối
+        if (viewHistory.Count > 0)
+        {
+            viewHistory.Peek().SetActive(false);
+        }
+
+        targetView.SetActive(true);
+        viewHistory.Push(targetView);
+        backButton.gameObject.SetActive(true);
+        UpdateArrowsVisibility();
+
+        // 3. Đợi 1 frame để render xong view mới
+        yield return null;
+
+        // 4. Fade in (làm sáng màn hình)
+        if (SceneController.Instance != null)
+        {
+            SceneController.Instance.FadeTo(0f, duration);
+            yield return new WaitForSeconds(duration);
+        }
+    }
+
+    private IEnumerator TransitionBack()
+    {
+        float duration = 0.15f;
+
+        // 1. Fade out (làm tối màn hình)
+        if (SceneController.Instance != null)
+        {
+            SceneController.Instance.FadeTo(1f, duration);
+            yield return new WaitForSeconds(duration);
+        }
+
+        // 2. Chuyển đổi trạng thái View khi màn hình tối
+        GameObject currentView = viewHistory.Pop();
+        currentView.SetActive(false);
+
+        GameObject previousView = viewHistory.Peek();
+        previousView.SetActive(true);
+
+        if (viewHistory.Count == 1)
+        {
+            backButton.gameObject.SetActive(false);
+        }
+        UpdateArrowsVisibility();
+
+        // 3. Đợi 1 frame để render xong view mới
+        yield return null;
+
+        // 4. Fade in (làm sáng màn hình)
+        if (SceneController.Instance != null)
+        {
+            SceneController.Instance.FadeTo(0f, duration);
+            yield return new WaitForSeconds(duration);
+        }
     }
 }

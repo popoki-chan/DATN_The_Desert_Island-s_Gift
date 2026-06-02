@@ -204,7 +204,14 @@ public class CutscenePlayer : MonoBehaviour
 
         if (loadNextSceneOnComplete && !string.IsNullOrEmpty(nextSceneName))
         {
-            UnityEngine.SceneManagement.SceneManager.LoadScene(nextSceneName);
+            if (SceneController.Instance != null)
+            {
+                SceneController.Instance.LoadScene(nextSceneName);
+            }
+            else
+            {
+                UnityEngine.SceneManagement.SceneManager.LoadScene(nextSceneName);
+            }
         }
     }
 }
