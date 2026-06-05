@@ -261,7 +261,14 @@ public class FruitCarver : MonoBehaviour
         }
 
         // 3. Tự ẩn quả
-        gameObject.SetActive(false);
+        if (ViewManager.Instance != null)
+        {
+            ViewManager.Instance.GoBack();
+        }
+        else
+        {
+            gameObject.SetActive(false);
+        }
 
         // Kích hoạt các sự kiện phụ
         onCarvingFinished?.Invoke();

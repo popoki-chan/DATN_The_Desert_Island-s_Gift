@@ -21,10 +21,7 @@ public class SunlightFlicker : MonoBehaviour
         if (sr == null) return;
 
         timer += Time.deltaTime * pulseSpeed;
-        // Tạo dao động hình sin từ -1 đến 1, rồi chuyển về 0 đến 1
         float sinVal = (Mathf.Sin(timer) + 1f) * 0.5f;
-        
-        // Lerp alpha giữa min và max
         Color c = sr.color;
         c.a = Mathf.Lerp(minAlpha, maxAlpha, sinVal);
         sr.color = c;

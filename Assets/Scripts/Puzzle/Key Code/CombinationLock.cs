@@ -44,17 +44,12 @@ public class CombinationLock : MonoBehaviour
     private void Unlock()
     {
         isUnlocked = true;
-        Debug.Log("<color=green>[CombinationLock]</color> Mật mã ĐÚNG! Đồng bộ rương toàn cục.");
-
-        // 1. Đổi ảnh rương Cận Cảnh
         if (chestClosedVisual != null) chestClosedVisual.SetActive(false);
         if (chestOpenVisual != null) chestOpenVisual.SetActive(true);
 
-        // 1.1 ĐỒNG BỘ: Đổi ảnh rương Ngoài Bãi Biển
         if (mainViewChestClosed != null) mainViewChestClosed.SetActive(false);
         if (mainViewChestOpen != null) mainViewChestOpen.SetActive(true);
 
-        // 2. Mở khóa logic & tráo đường link Zoom
         if (targetChest != null)
         {
             targetChest.isLocked = false;
@@ -66,7 +61,6 @@ public class CombinationLock : MonoBehaviour
             }
         }
 
-        // 3. Tự lùi camera ra ngoài sau 0.8s
         Invoke(nameof(ExitZoom), 0.8f);
     }
 

@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: seed
   itemName: Strange seed
-  icon: {fileID: 21300000, guid: 05bda271b22e5534aa9d0f278aaf2603, type: 3}
+  icon: {fileID: 21300000, guid: be866297d18675a4c88a022df9d144d3, type: 3}
   description: 
   stackable: 0
+  maxUses: 1

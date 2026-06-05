@@ -33,8 +33,6 @@ public class NumberWheel2D : MonoBehaviour
         if (digitSprites == null || digitSprites.Length == 0) return;
         currentNumber = (currentNumber + 1) % digitSprites.Length;
         UpdateDisplay();
-
-        // Báo cho ổ khóa kiểm tra mật mã ngay sau khi số thay đổi
         if (lockManager != null) lockManager.CheckCode();
     }
 
@@ -43,8 +41,6 @@ public class NumberWheel2D : MonoBehaviour
         if (digitSprites == null || digitSprites.Length == 0) return;
         currentNumber = (currentNumber - 1 + digitSprites.Length) % digitSprites.Length;
         UpdateDisplay();
-
-        // Báo cho ổ khóa kiểm tra mật mã ngay sau khi số thay đổi
         if (lockManager != null) lockManager.CheckCode();
     }
 

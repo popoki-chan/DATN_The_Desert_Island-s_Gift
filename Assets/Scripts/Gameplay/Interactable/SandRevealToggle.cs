@@ -11,7 +11,7 @@ public class SandRevealToggle : MonoBehaviour
 
     [Header("Hiệu ứng")]
     public float fadeDuration = 0.35f;
-    public bool useJump = false; // nhún nhẹ trước khi fade
+    public bool useJump = false;
     public float jumpHeight = 0.15f;
     public float jumpDuration = 0.18f;
 
@@ -20,10 +20,9 @@ public class SandRevealToggle : MonoBehaviour
     public float sfxVolume = 1f;
 
     [Header("Hành vi")]
-    public bool startHidden = false; // nếu true thì cát bắt đầu ẩn (vật dưới hiện)
+    public bool startHidden = false;
     public bool disableColliderWhenHidden = true;
 
-    // internal
     SpriteRenderer sr;
     Collider2D col;
     bool isHidden = false;
@@ -37,7 +36,6 @@ public class SandRevealToggle : MonoBehaviour
         if (sr != null) originalColor = sr.color;
         originalPos = transform.position;
 
-        // khởi tạo trạng thái ban đầu
         if (startHidden)
             SetHiddenState(true, instant: true);
         else
@@ -54,8 +52,6 @@ public class SandRevealToggle : MonoBehaviour
     void Update()
     {
         if (SettingsPopupController.IsOpen) return;
-
-        // Touch support
         if (Input.touchCount > 0)
         {
             foreach (Touch t in Input.touches)
@@ -73,18 +69,14 @@ public class SandRevealToggle : MonoBehaviour
 
     public void ToggleReveal()
     {
-        // play sfx
         if (sandSfx != null)
             AudioSource.PlayClipAtPoint(sandSfx, Camera.main.transform.position, sfxVolume);
-
-        // nếu đang ẩn thì hiện lại, ngược lại ẩn
         if (isHidden)
             StartCoroutine(FadeInAndHideReveals());
         else
             StartCoroutine(FadeOutAndShowReveals());
     }
 
-    // Set trạng thái ngay lập tức (dùng ở Awake hoặc reset)
     void SetHiddenState(bool hidden, bool instant = false)
     {
         isHidden = hidden;
@@ -93,7 +85,7 @@ public class SandRevealToggle : MonoBehaviour
             Color c = originalColor;
             c.a = hidden ? 0f : originalColor.a;
             sr.color = c;
-            sr.enabled = !hidden || !instant ? sr.enabled : !hidden; // đảm bảo visible nếu not hidden
+            sr.enabled = !hidden || !instant ? sr.enabled : !hidden;
         }
         if (col != null)
             col.enabled = !(hidden && disableColliderWhenHidden);
@@ -114,11 +106,8 @@ public class SandRevealToggle : MonoBehaviour
 
     IEnumerator FadeOutAndShowReveals()
     {
-        // optional jump feedback
         if (useJump)
             yield return StartCoroutine(JumpCoroutine(jumpHeight, jumpDuration));
-
-        // fade out cát
         if (sr != null)
         {
             float elapsed = 0f;
@@ -136,11 +125,7 @@ public class SandRevealToggle : MonoBehaviour
             end.a = 0f;
             sr.color = end;
         }
-
-        // disable collider nếu cần
         if (col != null && disableColliderWhenHidden) col.enabled = false;
-
-        // bật tương tác của các object nằm dưới
         foreach (var go in revealObjects)
         {
             if (go == null) continue;
@@ -159,7 +144,6 @@ public class SandRevealToggle : MonoBehaviour
 
     IEnumerator FadeInAndHideReveals()
     {
-        // tắt tương tác của các object nằm dưới trước khi fade in cát
         foreach (var go in revealObjects)
         {
             if (go == null) continue;
@@ -172,11 +156,7 @@ public class SandRevealToggle : MonoBehaviour
                 interact.enabled = false;
             }
         }
-
-        // enable collider trước khi fade in (để có thể click nếu cần)
         if (col != null) col.enabled = true;
-
-        // fade in cát
         if (sr != null)
         {
             float elapsed = 0f;

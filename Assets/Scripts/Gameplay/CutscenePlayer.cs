@@ -36,6 +36,11 @@ public class CutscenePlayer : MonoBehaviour
     private float delayTimer = 0f;
     private Tween fadeTween;
 
+    private GameObject cachedInventoryPanel;
+    private GameObject cachedBtnSetting;
+    private GameObject cachedButtonParent;
+    private GameObject cachedBorder;
+
     void OnDestroy()
     {
         fadeTween?.Kill();
@@ -59,6 +64,17 @@ public class CutscenePlayer : MonoBehaviour
 
     public void PlayCutscene()
     {
+        // Cache references and deactivate gameplay UI elements
+        cachedInventoryPanel = GameObject.Find("InventoryPanel");
+        cachedBtnSetting = GameObject.Find("Btn Setting");
+        cachedButtonParent = GameObject.Find("Button");
+        cachedBorder = GameObject.Find("Border");
+
+        if (cachedInventoryPanel != null) cachedInventoryPanel.SetActive(false);
+        if (cachedBtnSetting != null) cachedBtnSetting.SetActive(false);
+        if (cachedButtonParent != null) cachedButtonParent.SetActive(false);
+        if (cachedBorder != null) cachedBorder.SetActive(false);
+
         if (slides == null || slides.Length == 0)
         {
             Debug.LogWarning("[CutscenePlayer] Không có slide nào để chạy!");
@@ -200,6 +216,21 @@ public class CutscenePlayer : MonoBehaviour
     {
         isPlaying = false;
         Debug.Log("[CutscenePlayer] Kết thúc cutscene!");
+
+        // Reactivate gameplay UI if we are staying in this scene
+        if (!loadNextSceneOnComplete || string.IsNullOrEmpty(nextSceneName))
+        {
+            if (cachedInventoryPanel != null) cachedInventoryPanel.SetActive(true);
+            if (cachedBtnSetting != null) cachedBtnSetting.SetActive(true);
+            if (cachedButtonParent != null) cachedButtonParent.SetActive(true);
+            if (cachedBorder != null) cachedBorder.SetActive(true);
+
+            if (ViewManager.Instance != null)
+            {
+                ViewManager.Instance.GoBack();
+            }
+        }
+
         onCutsceneComplete?.Invoke();
 
         if (loadNextSceneOnComplete && !string.IsNullOrEmpty(nextSceneName))

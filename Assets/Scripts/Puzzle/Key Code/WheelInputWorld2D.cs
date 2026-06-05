@@ -17,7 +17,6 @@ public class WheelInputWorld2D : MonoBehaviour
         mainCam = Camera.main;
     }
 
-    // MOUSE (Editor / PC)
     void OnMouseDown()
     {
         if (SettingsPopupController.IsOpen) return;
@@ -34,7 +33,7 @@ public class WheelInputWorld2D : MonoBehaviour
         isDragging = false;
     }
 
-    // TOUCH (Mobile)
+
     void Update()
     {
         if (SettingsPopupController.IsOpen)
@@ -45,7 +44,7 @@ public class WheelInputWorld2D : MonoBehaviour
 
         if (Input.touchCount == 0) return;
 
-        // Tìm touch liên quan đến object này bằng raycast
+  
         foreach (Touch t in Input.touches)
         {
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(t.fingerId)) continue;
@@ -70,13 +69,13 @@ public class WheelInputWorld2D : MonoBehaviour
 
     void HandleSwipe(Vector2 delta)
     {
-        // Chỉ xét theo chiều dọc nếu đủ ngưỡng
+   
         if (Mathf.Abs(delta.y) >= dragThresholdPixels && Mathf.Abs(delta.y) > Mathf.Abs(delta.x))
         {
             if (delta.y > 0)
-                wheel.Increment(); // vuốt lên
+                wheel.Increment(); 
             else
-                wheel.Decrement(); // vuốt xuống
+                wheel.Decrement(); 
         }
         else
         {

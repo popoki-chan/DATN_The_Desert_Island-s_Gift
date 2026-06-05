@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: sharp_rock_ch2
   m_EditorClassIdentifier: 
   itemId: sharp_rock_ch2
-  itemName: Sharp Rock
+  itemName: Sharp rock
   icon: {fileID: 21300000, guid: 8cdaba687f322904aae610c4a8837265, type: 3}
   description: 
   stackable: 0

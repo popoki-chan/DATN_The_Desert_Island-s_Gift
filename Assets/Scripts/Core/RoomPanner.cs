@@ -23,6 +23,8 @@ public class RoomPanner : MonoBehaviour
     private Vector3 currentVelocity;
     private bool isDragging = false;
 
+    public bool IsDragging => isDragging;
+
     void Start()
     {
         targetPos = transform.position;

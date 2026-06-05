@@ -93,14 +93,9 @@ public class InteractableAnimation : MonoBehaviour
         }
     }
 
-    // ==========================================
-    // 1. SHAKE (DÙNG COROUTINE & MATHF.SIN CỦA BẠN)
-    // ==========================================
     private void StartShake()
     {
         if (shakeCoroutine != null) return;
-
-        // Tắt các hiệu ứng xoay DOTween đang chạy dở để tránh loạn góc
         transform.DOKill();
         shakeCoroutine = StartCoroutine(DoShakeRoutine());
     }
@@ -113,7 +108,6 @@ public class InteractableAnimation : MonoBehaviour
         while (elapsed < shakeDuration)
         {
             float t = elapsed * shakeFrequency;
-            // Công thức toán học Damped Sine Wave cực xịn của bạn
             float angle = Mathf.Sin(t) * shakeAmplitude * (1f - elapsed / shakeDuration);
 
             transform.rotation = baseRot * Quaternion.Euler(0f, 0f, angle);
@@ -125,9 +119,6 @@ public class InteractableAnimation : MonoBehaviour
         shakeCoroutine = null;
     }
 
-    // ==========================================
-    // 2. ROTATE (DÙNG DOTWEEN)
-    // ==========================================
     private void StartRotate()
     {
         Tween rotTween = DoRotateTween();
@@ -141,7 +132,7 @@ public class InteractableAnimation : MonoBehaviour
 
     private Tween DoRotateTween()
     {
-        transform.DOKill(); // Dừng các xoay dở dang
+        transform.DOKill();
 
         switch (rotateMode)
         {
@@ -159,9 +150,6 @@ public class InteractableAnimation : MonoBehaviour
         return null;
     }
 
-    // ==========================================
-    // 3. KẾT HỢP XOAY VÀ LẮC
-    // ==========================================
     private void StartRotateThenShake()
     {
         Tween rotTween = DoRotateTween();
@@ -170,7 +158,6 @@ public class InteractableAnimation : MonoBehaviour
         {
             rotTween.OnComplete(() => {
                 if (rotateOnce) isRotated = true;
-                // Khi DOTween xoay xong, lập tức gọi Coroutine Lắc của bạn
                 StartShake();
             });
         }
@@ -180,9 +167,6 @@ public class InteractableAnimation : MonoBehaviour
         }
     }
 
-    // ==========================================
-    // 4. ANIMATION NHẶT ĐỒ (DÙNG DOTWEEN)
-    // ==========================================
     public void PlayPickupAnimation(Action onCompleteCallback)
     {
         transform.DOKill();
@@ -190,27 +174,18 @@ public class InteractableAnimation : MonoBehaviour
 
         Sequence pickupSeq = DOTween.Sequence();
 
-        // Lưu lại vị trí gốc
         float startY = transform.position.y;
         Vector3 startScale = transform.localScale;
-
-        // Chia tỷ lệ thời gian: 60% thời gian đầu để bay lên, 40% để trũng xuống
         float upTime = jumpDuration * 0.6f;
         float downTime = jumpDuration * 0.4f;
 
-        // NHỊP 1: Bay vút lên + Hơi phình to ra một chút (Tạo cảm giác căng mọng boing boing)
         pickupSeq.Append(transform.DOMoveY(startY + jumpHeight, upTime).SetEase(Ease.OutQuad));
         pickupSeq.Join(transform.DOScale(startScale * 1.1f, upTime).SetEase(Ease.OutQuad));
 
-        // NHỊP 2: Rớt trũng xuống (Dip) + Teo nhỏ lại để chuẩn bị chui vào túi đồ
         pickupSeq.Append(transform.DOMoveY(startY + jumpHeight - dipAmount, downTime).SetEase(Ease.InOutSine));
         pickupSeq.Join(transform.DOScale(startScale * 0.7f, downTime).SetEase(Ease.InOutSine));
-
-        // NHỊP 3: Mờ dần (Fade)
         if (useFade && spriteRenderer != null)
         {
-            // Lệnh Insert giúp chèn hiệu ứng Fade vào thời điểm "upTime" 
-            // Tức là ngay khi nó bay lên tới đỉnh và bắt đầu trũng xuống thì nó mới mờ đi
             pickupSeq.Insert(upTime, spriteRenderer.DOFade(0f, fadeDuration));
         }
 

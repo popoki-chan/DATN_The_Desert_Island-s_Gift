@@ -11,14 +11,12 @@ public class PlayerCursor : MonoBehaviour
 
     void Update()
     {
-        // 1. Chặn mọi tương tác khi popup Settings đang mở
         if (SettingsPopupController.IsOpen)
         {
             Cursor.SetCursor(defaultCursor, Vector2.zero, CursorMode.Auto);
             return;
         }
 
-        // 2. Chặn tương tác khi chuột/touch đang đè lên các phần tử UI khác (Inventory, HUD...)
         if (IsPointerOverUI())
         {
             Cursor.SetCursor(defaultCursor, Vector2.zero, CursorMode.Auto);
@@ -45,7 +43,6 @@ public class PlayerCursor : MonoBehaviour
                 Interactable interact = hit.collider.GetComponent<Interactable>();
                 if (interact != null)
                 {
-                    // If player has selected an item, attempt use
                     Item selected = InventoryUI.Instance?.SelectedItem;
                     if (selected != null)
                     {
@@ -53,7 +50,6 @@ public class PlayerCursor : MonoBehaviour
                     }
                     else
                     {
-                        // normal click
                         interact.RaiseClicked(); 
                         if (interact.isPickable) interact.Pickup();
                         else interact.Interact();
@@ -62,7 +58,6 @@ public class PlayerCursor : MonoBehaviour
             }
             else
             {
-                // click empty space: deselect item
                 InventoryUI.Instance?.Deselect();
             }
         }
@@ -72,8 +67,6 @@ public class PlayerCursor : MonoBehaviour
     {
         if (EventSystem.current == null) return false;
         if (EventSystem.current.IsPointerOverGameObject()) return true;
-        
-        // Touch support
         for (int i = 0; i < Input.touchCount; i++)
         {
             if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))

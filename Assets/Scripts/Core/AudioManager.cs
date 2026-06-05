@@ -12,9 +12,43 @@ public class AudioManager : Singleton<AudioManager>
     public float musicVolume = 0.7f;
     public float sfxVolume = 1f;
 
+    protected override void Awake()
+    {
+        base.Awake();
+
+        if (musicSource == null)
+        {
+            var sources = GetComponents<AudioSource>();
+            if (sources.Length > 0)
+            {
+                musicSource = sources[0];
+            }
+            else
+            {
+                musicSource = gameObject.AddComponent<AudioSource>();
+            }
+            musicSource.playOnAwake = false;
+            musicSource.spatialBlend = 0f;
+        }
+
+        if (sfxSource == null)
+        {
+            var sources = GetComponents<AudioSource>();
+            if (sources.Length > 1)
+            {
+                sfxSource = sources[1];
+            }
+            else
+            {
+                sfxSource = gameObject.AddComponent<AudioSource>();
+            }
+            sfxSource.playOnAwake = false;
+            sfxSource.spatialBlend = 0f;
+        }
+    }
+
     void Start()
     {
-        // Load saved volume preferences
         musicVolume = PlayerPrefs.GetFloat("MusicVolume", 0.7f);
         sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
 

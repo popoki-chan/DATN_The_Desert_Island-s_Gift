@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: coconut_shell
   m_EditorClassIdentifier: 
   itemId: coconut_shell
-  itemName: Coconut Shell
+  itemName: Coconut shell
   icon: {fileID: 21300000, guid: 67ca4e48e2b11f24f9723b2c15aeee6b, type: 3}
   description: 
   stackable: 0
+  maxUses: 1

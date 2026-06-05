@@ -55,9 +55,7 @@ public class SaveSystem : Singleton<SaveSystem>
     {
         AsyncOperation op = SceneManager.LoadSceneAsync(data.currentScene);
         while (!op.isDone) yield return null;
-        yield return null; // wait one frame for objects to initialize
-
-        // Restore inventory
+        yield return null;
         if (Inventory.Instance != null)
         {
             Inventory.Instance.ClearAll();
@@ -69,7 +67,6 @@ public class SaveSystem : Singleton<SaveSystem>
             }
         }
 
-        // Restore puzzles
         if (PuzzleManager.Instance != null)
         {
             PuzzleManager.Instance.ClearAllStates();

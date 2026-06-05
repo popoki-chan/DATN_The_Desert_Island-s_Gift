@@ -33,6 +33,7 @@ public class SeagullFeedingEvent : MonoBehaviour
     private Interactable coreLogic;
     private SpriteRenderer seagullSpriteRenderer;
     private Sprite originalSprite;
+    private Vector3 originalWorldScale = Vector3.one;
 
     void Awake()
     {
@@ -50,7 +51,11 @@ public class SeagullFeedingEvent : MonoBehaviour
     void Start()
     {
         if (seagullTransform != null) seagullTransform.gameObject.SetActive(false);
-        if (fishOnRockVisual != null) fishOnRockVisual.SetActive(false);
+        if (fishOnRockVisual != null)
+        {
+            originalWorldScale = fishOnRockVisual.transform.lossyScale;
+            fishOnRockVisual.SetActive(false);
+        }
 
         coreLogic.requiredItemId = fishItemId;
         coreLogic.isLocked = true;
@@ -110,7 +115,14 @@ public class SeagullFeedingEvent : MonoBehaviour
                         fishOnRockVisual.transform.SetParent(parentTransform);
                         fishOnRockVisual.transform.localPosition = Vector3.zero;
                         fishOnRockVisual.transform.localRotation = Quaternion.identity;
-                        fishOnRockVisual.transform.localScale = Vector3.one;
+                        
+                        // Preserve the original world scale under the scaled parentTransform
+                        Vector3 parentScale = parentTransform.lossyScale;
+                        fishOnRockVisual.transform.localScale = new Vector3(
+                            parentScale.x != 0 ? originalWorldScale.x / parentScale.x : originalWorldScale.x,
+                            parentScale.y != 0 ? originalWorldScale.y / parentScale.y : originalWorldScale.y,
+                            parentScale.z != 0 ? originalWorldScale.z / parentScale.z : originalWorldScale.z
+                        );
                     }
                 }
             });

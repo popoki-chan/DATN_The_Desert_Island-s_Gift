@@ -16,6 +16,8 @@ public class Interactable : MonoBehaviour
 
     [Header("Âm thanh")]
     public AudioClip onClickSfx;
+    public AudioClip pickupSfx;
+    public AudioClip failUseSfx;
 
     [Header("Chuyển cảnh Zoom In")]
     public bool isZoomable = false;
@@ -25,9 +27,8 @@ public class Interactable : MonoBehaviour
     [Tooltip("GameObject ở view khác cần đồng bộ ẩn/phá hủy theo object này")]
     public GameObject syncTarget;
 
-    // --- SỰ KIỆN CHO CÁC HỆ THỐNG KHÁC LẮNG NGHE ---
-    public event Action<Interactable> OnClicked; // Trả lại cho PlayerCursor
-    public event Action OnDefaultInteract;       // Dành cho InteractableAnimation (DOTween)
+    public event Action<Interactable> OnClicked; 
+    public event Action OnDefaultInteract;      
 
     public void RaiseClicked()
     {
@@ -36,13 +37,9 @@ public class Interactable : MonoBehaviour
 
     void OnMouseDown()
     {
-        // --- THÊM KHIÊN CHỐNG XUYÊN CLICK VÀO NGAY ĐÂY ---
+
         if (SettingsPopupController.IsOpen) return;
-
-        // Nếu chuột đang nằm trên UI (như nút bấm, ảnh nền UI), thì cấm không cho chạy tiếp code bên dưới!
         if (IsPointerOverUI()) return;
-
-        // Tránh click xuyên qua vật thể khác ở phía trước
         if (Camera.main != null)
         {
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -53,7 +50,6 @@ public class Interactable : MonoBehaviour
             }
         }
 
-        // Báo hiệu click chuột
         OnClicked?.Invoke(this);
 
         if (isPickable)
@@ -92,7 +88,7 @@ public class Interactable : MonoBehaviour
     public virtual void Interact()
     {
         AudioManager.Instance?.PlaySFX(onClickSfx);
-        OnDefaultInteract?.Invoke(); // Gọi DOTween
+        OnDefaultInteract?.Invoke();
     }
 
     public virtual void Pickup()
@@ -101,6 +97,12 @@ public class Interactable : MonoBehaviour
 
         Item asset = Resources.Load<Item>($"Items/{id}");
         if (asset == null) return;
+
+        var clipToPlay = pickupSfx != null ? pickupSfx : onClickSfx;
+        if (clipToPlay != null)
+        {
+            AudioManager.Instance?.PlaySFX(clipToPlay);
+        }
 
         if (TryGetComponent<InteractableAnimation>(out var feedback))
         {
@@ -132,7 +134,6 @@ public class Interactable : MonoBehaviour
 
     protected virtual void OnDestroy()
     {
-        // Tự động phá hủy syncTarget khi đối tượng này bị phá hủy (như khi thu hoạch quả)
         if (syncTarget != null && syncTarget.gameObject != null)
         {
             Destroy(syncTarget);

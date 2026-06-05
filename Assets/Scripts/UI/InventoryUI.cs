@@ -12,6 +12,9 @@ public class InventoryUI : Singleton<InventoryUI>
     public Sprite normalSlotSprite;  
     public Sprite selectedSlotSprite; 
 
+    [Header("UI Text hiển thị tên Item")]
+    public TMPro.TextMeshProUGUI selectedItemNameText;
+
     [HideInInspector] public Item SelectedItem;
 
     // Quản lý ánh xạ: Slot nào đang chứa Item nào và ngược lại
@@ -178,10 +181,35 @@ public class InventoryUI : Singleton<InventoryUI>
                 slot.GetComponent<Image>().sprite = normalSlotSprite;
             }
         }
+        if (Inventory.Instance != null)
+        {
+            Inventory.Instance.SelectItem(null);
+        }
     }
 
     private void HandleItemSelected(Item item)
     {
-        // Bạn có thể phát âm thanh click chọn đồ ở đây nếu muốn
+        if (selectedItemNameText != null)
+        {
+            if (item != null)
+            {
+                selectedItemNameText.text = item.itemName;
+                selectedItemNameText.gameObject.SetActive(true);
+
+                // Thẳng hàng theo chiều dọc (World Y) với Slot chứa vật phẩm
+                if (slotMap.TryGetValue(item, out GameObject slot))
+                {
+                    Vector3 slotWorldPos = slot.transform.position;
+                    Vector3 textWorldPos = selectedItemNameText.transform.position;
+                    textWorldPos.y = slotWorldPos.y;
+                    selectedItemNameText.transform.position = textWorldPos;
+                }
+            }
+            else
+            {
+                selectedItemNameText.text = "";
+                selectedItemNameText.gameObject.SetActive(false);
+            }
+        }
     }
 }

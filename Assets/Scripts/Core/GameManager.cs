@@ -65,8 +65,6 @@ public class GameManager : Singleton<GameManager>
 
         BindSettingsButton();
 
-        // Tự động mở khóa Chapter tương ứng với scene đang chơi.
-        // Đảm bảo nếu người chơi thoát game khi đang chơi dở màn 2, khi quay lại menu chính Chapter 2 đã được mở khóa.
         string sceneName = scene.name;
         if (sceneName.StartsWith("Chapter"))
         {
@@ -78,7 +76,6 @@ public class GameManager : Singleton<GameManager>
                 {
                     PlayerPrefs.SetInt("UnlockedChapter", chapterNum);
                     PlayerPrefs.Save();
-                    Debug.Log($"<color=green>[GameManager] Tự động mở khóa Chapter {chapterNum} khi vào scene!</color>");
                 }
             }
         }

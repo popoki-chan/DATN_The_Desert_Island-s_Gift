@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: sharp_bough
   m_EditorClassIdentifier: 
   itemId: sharp_bough
-  itemName: Sharp_Bough
+  itemName: Sharp branch
   icon: {fileID: 21300000, guid: 946321fa85ccd804c86021eecd202b9d, type: 3}
   description: 
   stackable: 0
+  maxUses: 1

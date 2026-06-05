@@ -19,10 +19,14 @@ public class PlantingPuzzle : MonoBehaviour
     [Tooltip("Object Mầm cây con (Mọc lên SAU KHI tưới nước)")]
     public GameObject seedlingVisual;
 
+    [Tooltip("Mầm cây cấp độ 2 (Mọc lên khi click tiếp vào sprout lv 1)")]
+    public GameObject seedlingLv2Visual;
+
     [Header("2b. Đồ họa thu nhỏ (Inside Island Visuals)")]
     public GameObject mapDirtMoundVisual;
     public GameObject mapPlacedSeedVisual;
     public GameObject mapSeedlingVisual;
+    public GameObject mapSeedlingLv2Visual;
 
     [Header("3. Tinh chỉnh Hoạt ảnh Đào (Offsets)")]
     public float leftOffset = 0.3f;
@@ -44,7 +48,7 @@ public class PlantingPuzzle : MonoBehaviour
     public CutscenePlayer cutscenePlayer;
 
     private Interactable interactable;
-    private int puzzleStep = 0; // 0: Cát phẳng, 1: Ụ đất, 2: Hạt nằm trên đất, 3: Nảy mầm
+    private int puzzleStep = 0; // 0: Cát phẳng, 1: Ụ đất, 2: Hạt nằm trên đất, 3: Chờ mọc mầm 2
 
     void Awake()
     {
@@ -57,10 +61,12 @@ public class PlantingPuzzle : MonoBehaviour
         if (toolDiggingVisual != null) toolDiggingVisual.SetActive(false);
         if (placedSeedVisual != null) placedSeedVisual.SetActive(false);
         if (seedlingVisual != null) seedlingVisual.SetActive(false);
+        if (seedlingLv2Visual != null) seedlingLv2Visual.SetActive(false);
 
         if (mapDirtMoundVisual != null) mapDirtMoundVisual.transform.localScale = Vector3.zero;
         if (mapPlacedSeedVisual != null) mapPlacedSeedVisual.SetActive(false);
         if (mapSeedlingVisual != null) mapSeedlingVisual.SetActive(false);
+        if (mapSeedlingLv2Visual != null) mapSeedlingLv2Visual.SetActive(false);
 
         interactable.requiredItemId = digToolId;
         interactable.isLocked = true;
@@ -142,47 +148,41 @@ public class PlantingPuzzle : MonoBehaviour
             puzzleStep = 2; // Chuyển sang chờ tưới nước
         }
 
-        // --- BƯỚC 3: TƯỚI NƯỚC (NẢY MẦM) ---
+        // --- BƯỚC 3: TƯỚI NƯỚC (NẢY MẦM 1) ---
         else if (puzzleStep == 2)
         {
-            Sequence growSequence = DOTween.Sequence();
+            if (placedSeedVisual != null) placedSeedVisual.SetActive(false);
+            if (mapPlacedSeedVisual != null) mapPlacedSeedVisual.SetActive(false);
 
-            // 1. Nếu có ảnh hạt giống, cho nó teo nhỏ lại và biến mất
-            if (placedSeedVisual != null)
-            {
-                growSequence.Append(placedSeedVisual.transform.DOScale(Vector3.zero, 0.2f));
-                growSequence.AppendCallback(() => placedSeedVisual.SetActive(false));
-            }
-            if (mapPlacedSeedVisual != null)
-            {
-                growSequence.Join(mapPlacedSeedVisual.transform.DOScale(Vector3.zero, 0.2f));
-                growSequence.AppendCallback(() => mapPlacedSeedVisual.SetActive(false));
-            }
+            if (seedlingVisual != null) seedlingVisual.SetActive(true);
+            if (mapSeedlingVisual != null) mapSeedlingVisual.SetActive(true);
 
-            // 2. Mầm non búng lên từ dưới đất
-            if (seedlingVisual != null)
-            {
-                growSequence.AppendCallback(() => seedlingVisual.SetActive(true));
-                growSequence.Append(seedlingVisual.transform.DOScale(Vector3.zero, 0.5f).From().SetEase(Ease.OutBack));
-            }
-            if (mapSeedlingVisual != null)
-            {
-                growSequence.AppendCallback(() => mapSeedlingVisual.SetActive(true));
-                growSequence.Join(mapSeedlingVisual.transform.DOScale(Vector3.zero, 0.5f).From().SetEase(Ease.OutBack));
-            }
+            Debug.Log("<color=cyan>[Planting]</color> Đã tưới nước! Cây đã nảy mầm cấp 1!");
+            interactable.requiredItemId = "";
+            interactable.isLocked = false;
+            interactable.description = "Mầm cây con đã mọc lên. Hãy thử chạm vào nó xem sao...";
+            puzzleStep = 3;
+        }
 
-            growSequence.OnComplete(() => {
-                Debug.Log("<color=cyan>[Planting]</color> Đã tưới nước! Cây đã nảy mầm!");
-                interactable.requiredItemId = "";
-                interactable.isLocked = false;
-                interactable.description = "Một mầm non xanh tươi! Phép màu của sự sống là đây.";
-                interactable.OnDefaultInteract -= HandleInteraction;
-                onPlantingCompleted?.Invoke();
-                if (cutscenePlayer != null)
-                {
-                    cutscenePlayer.PlayCutscene();
-                }
-            });
+        // --- BƯỚC 4: CLICK MẦM 1 -> MỌC MẦM 2 ---
+        else if (puzzleStep == 3)
+        {
+            if (seedlingVisual != null) seedlingVisual.SetActive(false);
+            if (mapSeedlingVisual != null) mapSeedlingVisual.SetActive(false);
+
+            if (seedlingLv2Visual != null) seedlingLv2Visual.SetActive(true);
+            if (mapSeedlingLv2Visual != null) mapSeedlingLv2Visual.SetActive(true);
+
+            Debug.Log("<color=cyan>[Planting]</color> Cây đã phát triển thành Sprout Lv 2!");
+            interactable.description = "Cây non đã lớn hẳn, tràn đầy sức sống linh thiêng!";
+            interactable.isLocked = true;
+            interactable.OnDefaultInteract -= HandleInteraction;
+
+            onPlantingCompleted?.Invoke();
+            if (cutscenePlayer != null)
+            {
+                cutscenePlayer.PlayCutscene();
+            }
         }
     }
 
@@ -191,10 +191,8 @@ public class PlantingPuzzle : MonoBehaviour
         if (toolDiggingVisual != null) toolDiggingVisual.transform.DOKill();
         if (dirtMoundVisual != null) dirtMoundVisual.transform.DOKill();
         if (placedSeedVisual != null) placedSeedVisual.transform.DOKill();
-        if (seedlingVisual != null) seedlingVisual.transform.DOKill();
 
         if (mapDirtMoundVisual != null) mapDirtMoundVisual.transform.DOKill();
         if (mapPlacedSeedVisual != null) mapPlacedSeedVisual.transform.DOKill();
-        if (mapSeedlingVisual != null) mapSeedlingVisual.transform.DOKill();
     }
 }

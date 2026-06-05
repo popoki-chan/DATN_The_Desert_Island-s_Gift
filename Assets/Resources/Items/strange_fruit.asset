@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: strange_fruit
   m_EditorClassIdentifier: 
   itemId: strange_fruit
-  itemName: Strange Fruit
+  itemName: Strange fruit
   icon: {fileID: 21300000, guid: 95eb72b74d1a90f40bd76d6c0b29763b, type: 3}
   description: 
   stackable: 0

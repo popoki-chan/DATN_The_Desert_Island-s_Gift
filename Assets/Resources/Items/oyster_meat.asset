@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: oyster_meat
   m_EditorClassIdentifier: 
   itemId: oyster_meat
-  itemName: Oyster Meat
-  icon: {fileID: 21300000, guid: 4e3f5f3f52e0edd4d9611b996c0f6e1f, type: 3}
+  itemName: Oyster meat
+  icon: {fileID: 21300000, guid: 7d32faee75896d041a6847fc79b26318, type: 3}
   description: 
   stackable: 0
+  maxUses: 1
