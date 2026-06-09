@@ -102,7 +102,7 @@ public class DragTutorialUI : MonoBehaviour
             if (isTrackingDrag && Input.GetMouseButton(0))
             {
                 float travel = Vector3.Distance(dragStartMousePos, Input.mousePosition);
-                if (travel > 40f) // Moved at least 40 pixels
+                if (travel > 40f)
                 {
                     isTrackingDrag = false;
                     TransitionToTapStep();
@@ -116,7 +116,6 @@ public class DragTutorialUI : MonoBehaviour
         }
         else if (currentStep == TutorialStep.Tap)
         {
-            // Check if user clicked/tapped on the scene (excluding UI)
             if (Input.GetMouseButtonDown(0))
             {
                 if (!IsPointerOverUI())

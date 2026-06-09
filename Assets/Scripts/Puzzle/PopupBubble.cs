@@ -33,6 +33,7 @@ public class PopupBubble : MonoBehaviour
 
     public void PlayAnimation()
     {
+        if (!enabled) return;
         if (currentSequence != null && currentSequence.IsActive()) return;
 
         if (dotSmallVisual) dotSmallVisual.SetActive(true);

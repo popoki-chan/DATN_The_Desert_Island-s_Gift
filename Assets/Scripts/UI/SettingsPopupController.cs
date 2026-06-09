@@ -112,30 +112,21 @@ public class SettingsPopupController : MonoBehaviour
 
     public void GoToMainMenu()
     {
-        // Go back to MainMenu scene
         SceneManager.LoadScene("MainMenu");
     }
 
     public void ResetData()
     {
-        // 1. Delete save progress key
         PlayerPrefs.DeleteKey("UnlockedChapter");
         PlayerPrefs.Save();
-        Debug.Log("<color=red>[SettingsPopup]</color> UnlockedChapter save data reset!");
-
-        // 2. Clear inventory items in memory
         if (Inventory.Instance != null)
         {
             Inventory.Instance.ClearAll();
         }
-
-        // 3. Clear puzzle states in memory
         if (PuzzleManager.Instance != null)
         {
             PuzzleManager.Instance.ClearAllStates();
         }
-
-        // 4. Reload the current scene to start fresh
         Scene activeScene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(activeScene.name);
     }

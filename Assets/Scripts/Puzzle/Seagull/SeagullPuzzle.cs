@@ -170,6 +170,8 @@ public class SeagullPuzzle : MonoBehaviour
             onEndingTriggered?.Invoke();
             if (endingCutscenePlayer != null)
             {
+                endingCutscenePlayer.loadNextSceneOnComplete = true;
+                endingCutscenePlayer.nextSceneName = "MainMenu";
                 endingCutscenePlayer.PlayCutscene();
             }
         });

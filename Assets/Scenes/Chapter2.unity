@@ -1434,6 +1434,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1966082767014740162, guid: ba5d85ef65369b546b4fe999373cdb0a, type: 3}
+      propertyPath: defaultNotificationSfx
+      value: 
+      objectReference: {fileID: 8300000, guid: ce5da229ecb310c47930f3d2f2d7b64a, type: 3}
     - target: {fileID: 3887349343390751310, guid: ba5d85ef65369b546b4fe999373cdb0a, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: -134

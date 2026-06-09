@@ -46,6 +46,12 @@ public class GiveItem : MonoBehaviour
 
     private void HandleItemGiven()
     {
+        if (TryGetComponent<PopupBubble>(out var bubble))
+        {
+            bubble.Hide();
+            bubble.enabled = false;
+        }
+
         if (characterHoldingVisual != null)
         {
             characterHoldingVisual.SetActive(true);

@@ -21,7 +21,6 @@ public class ItemPickupNotificationUI : MonoBehaviour
 
     void Start()
     {
-        // Set initial position to hidden
         if (notificationPanel != null)
         {
             Vector2 pos = notificationPanel.anchoredPosition;
@@ -29,8 +28,6 @@ public class ItemPickupNotificationUI : MonoBehaviour
             notificationPanel.anchoredPosition = pos;
             notificationPanel.gameObject.SetActive(false);
         }
-
-        // Subscribe to item added event
         if (Inventory.Instance != null)
         {
             Inventory.Instance.OnItemAdded += HandleItemAdded;
@@ -49,34 +46,23 @@ public class ItemPickupNotificationUI : MonoBehaviour
     private void HandleItemAdded(Item item)
     {
         if (item == null || notificationPanel == null || itemNameText == null) return;
-
-        // Kill any ongoing animation sequence
         activeSequence?.Kill();
 
-        // Update text
         itemNameText.text = $"{item.itemName}";
 
-        // Play SFX when item is added to inventory
         if (defaultNotificationSfx != null)
         {
             AudioManager.Instance?.PlaySFX(defaultNotificationSfx);
         }
 
-        // Start new animation sequence
         notificationPanel.gameObject.SetActive(true);
         
         activeSequence = DOTween.Sequence();
-        
-        // Slide down
+
         activeSequence.Append(notificationPanel.DOAnchorPosY(visibleY, slideDuration).SetEase(Ease.OutBack));
-        
-        // Wait
         activeSequence.AppendInterval(displayDuration);
-        
-        // Slide up
         activeSequence.Append(notificationPanel.DOAnchorPosY(hiddenY, slideDuration).SetEase(Ease.InQuad));
         
-        // Hide GameObject on complete
         activeSequence.OnComplete(() => {
             notificationPanel.gameObject.SetActive(false);
         });
