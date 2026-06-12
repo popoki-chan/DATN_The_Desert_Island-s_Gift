@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f1b3b4b945939a54ea0b23d3396115fb, type: 3}
-  m_Name: octopus_SkeletonData
+  m_Name: skeleton_SkeletonData
   m_EditorClassIdentifier: 
   atlasAssets:
-  - {fileID: 11400000, guid: 02c696251f2059a49b829f3cf9fa8891, type: 2}
+  - {fileID: 11400000, guid: 984b83a5d1f6930408e8c8040c77af1e, type: 2}
   scale: 0.01
-  skeletonJSON: {fileID: 4900000, guid: e619c886041ec4c4dbfb04f339b2d8a7, type: 3}
+  skeletonJSON: {fileID: 4900000, guid: 782b5cfe4f4fd0e4f9f6e5727e3e6772, type: 3}
   isUpgradingBlendModeMaterials: 0
   blendModeMaterials:
     requiresBlendModeMaterials: 0

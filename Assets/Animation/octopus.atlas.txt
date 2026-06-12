@@ -1,0 +1,132 @@
+
+octopus.png
+size: 1130,523
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Screenshot 2026-06-03 150511
+  rotate: false
+  xy: 2, 135
+  size: 558, 386
+  orig: 558, 386
+  offset: 0, 0
+  index: -1
+eye_down_l
+  rotate: false
+  xy: 2, 2
+  size: 11, 5
+  orig: 11, 5
+  offset: 0, 0
+  index: -1
+eye_down_r
+  rotate: false
+  xy: 513, 3
+  size: 21, 13
+  orig: 21, 13
+  offset: 0, 0
+  index: -1
+eye_mid_l
+  rotate: true
+  xy: 493, 2
+  size: 12, 8
+  orig: 12, 8
+  offset: 0, 0
+  index: -1
+eye_mid_r
+  rotate: true
+  xy: 513, 18
+  size: 22, 15
+  orig: 22, 15
+  offset: 0, 0
+  index: -1
+eye_up_l
+  rotate: true
+  xy: 503, 6
+  size: 8, 7
+  orig: 8, 7
+  offset: 0, 0
+  index: -1
+eye_up_r
+  rotate: true
+  xy: 493, 16
+  size: 24, 18
+  orig: 24, 18
+  offset: 0, 0
+  index: -1
+full_body
+  rotate: false
+  xy: 562, 205
+  size: 424, 316
+  orig: 424, 316
+  offset: 0, 0
+  index: -1
+head_l5
+  rotate: false
+  xy: 988, 327
+  size: 140, 194
+  orig: 140, 194
+  offset: 0, 0
+  index: -1
+optopus_eyes
+  rotate: false
+  xy: 434, 7
+  size: 57, 33
+  orig: 57, 33
+  offset: 0, 0
+  index: -1
+tan_l2
+  rotate: true
+  xy: 614, 48
+  size: 155, 141
+  orig: 155, 141
+  offset: 0, 0
+  index: -1
+ten_l1
+  rotate: true
+  xy: 757, 53
+  size: 150, 142
+  orig: 150, 142
+  offset: 0, 0
+  index: -1
+ten_l3
+  rotate: true
+  xy: 988, 126
+  size: 199, 132
+  orig: 199, 132
+  offset: 0, 0
+  index: -1
+ten_l4
+  rotate: false
+  xy: 434, 42
+  size: 178, 91
+  orig: 178, 91
+  offset: 0, 0
+  index: -1
+ten_l6
+  rotate: false
+  xy: 901, 9
+  size: 111, 115
+  orig: 111, 115
+  offset: 0, 0
+  index: -1
+ten_l7
+  rotate: false
+  xy: 300, 6
+  size: 132, 127
+  orig: 132, 127
+  offset: 0, 0
+  index: -1
+tentacles_l
+  rotate: false
+  xy: 2, 9
+  size: 296, 124
+  orig: 296, 124
+  offset: 0, 0
+  index: -1
+tentacles_r
+  rotate: false
+  xy: 1014, 5
+  size: 104, 119
+  orig: 104, 119
+  offset: 0, 0
+  index: -1

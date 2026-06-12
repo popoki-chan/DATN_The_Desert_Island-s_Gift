@@ -25,6 +25,10 @@ public class GiveItem : MonoBehaviour
     public string spineRunAnimation = "run";
     public bool loopSpineAnim = true;
 
+    [Header("5. Hiệu ứng nước (Splash Effect)")]
+    public GameObject splashPrefab;
+    public AudioClip splashSfx;
+
     private Interactable coreLogic;
     private SkeletonAnimation skeletonAnimation;
 
@@ -67,20 +71,34 @@ public class GiveItem : MonoBehaviour
             }
 
             Sequence runSeq = DOTween.Sequence();
-            runSeq.Join(transform.DOMove(escapePoint.position, runDuration).SetEase(runEase));
+            runSeq.Append(transform.DOMove(escapePoint.position, runDuration).SetEase(runEase));
+
+            runSeq.AppendCallback(() =>
+            {
+                if (splashSfx != null && AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlaySFX(splashSfx);
+                }
+
+                if (splashPrefab != null)
+                {
+                    Instantiate(splashPrefab, escapePoint.position, Quaternion.identity);
+                }
+            });
 
             if (fadeOutWhileRunning)
             {
+                float fadeDuration = 0.5f;
                 if (skeletonAnimation != null)
                 {
-                    runSeq.Join(DOTween.To(() => skeletonAnimation.skeleton.A, x => skeletonAnimation.skeleton.A = x, 0f, runDuration));
+                    runSeq.Append(DOTween.To(() => skeletonAnimation.skeleton.A, x => skeletonAnimation.skeleton.A = x, 0f, fadeDuration));
                 }
                 else
                 {
                     SpriteRenderer[] allSprites = GetComponentsInChildren<SpriteRenderer>();
                     foreach (var sr in allSprites)
                     {
-                        runSeq.Join(sr.DOFade(0f, runDuration));
+                        runSeq.Append(sr.DOFade(0f, fadeDuration));
                     }
                 }
             }

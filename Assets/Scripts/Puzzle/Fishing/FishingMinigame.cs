@@ -13,12 +13,22 @@ public class FishingMinigame : MonoBehaviour
 
     [Header("3. Lớp va chạm của cá")]
     public LayerMask fishLayer;
+    public float catchRadius = 0.35f;
 
     [Header("4. CẤU HÌNH LIÊN KẾT NHIỆM VỤ")]
     public FishermanQuest fishermanQuestScript;
 
     [Header("5. Cấu hình thời gian rút lui")]
     public float autoReturnDelay = 1.5f;
+
+    [Header("6. CẤU HÌNH THỜI GIAN & TÊ LIỆT")]
+    public float timeLimit = 30f;
+    public float stunDuration = 2f;
+    public Transform timeBarFill;
+
+    private float currentTimer;
+    private bool isStunned = false;
+    private float stunTimer = 0f;
 
     // Đổi canShoot thành false lúc đầu để chặn cú click thừa khi vừa chuyển cảnh
     private bool canShoot = false;
@@ -36,6 +46,14 @@ public class FishingMinigame : MonoBehaviour
     {
         isGameFinished = false;
         canShoot = false; // Khóa bắn tạm thời
+        isStunned = false;
+        stunTimer = 0f;
+        currentTimer = timeLimit;
+
+        if (timeBarFill != null)
+        {
+            timeBarFill.localScale = new Vector3(1f, timeBarFill.localScale.y, timeBarFill.localScale.z);
+        }
 
         delayedCallTween?.Kill();
         // Dùng DOTween để delay khoảng 0.15 giây (hoặc qua vài khung hình) 
@@ -69,6 +87,56 @@ public class FishingMinigame : MonoBehaviour
     {
         if (SettingsPopupController.IsOpen) return;
 
+        // Xử lý trạng thái tê liệt (stun)
+        if (isStunned)
+        {
+            stunTimer -= Time.deltaTime;
+            if (stunTimer <= 0f)
+            {
+                isStunned = false;
+                if (spearVisual != null)
+                {
+                    spearVisual.DOKill();
+                    spearVisual.position = spearOriginalPos;
+                }
+                canShoot = true;
+                Debug.Log("<color=yellow>[FishingMinigame]</color> Hết thời gian tê liệt! Lao sẵn sàng.");
+            }
+            return; // Khóa hoàn toàn đầu vào khi bị stun
+        }
+
+        // Cập nhật đếm ngược thời gian
+        if (!isGameFinished)
+        {
+            currentTimer -= Time.deltaTime;
+            if (timeBarFill != null)
+            {
+                float fillRatio = Mathf.Clamp01(currentTimer / timeLimit);
+                timeBarFill.localScale = new Vector3(fillRatio, timeBarFill.localScale.y, timeBarFill.localScale.z);
+            }
+
+            if (currentTimer <= 0f)
+            {
+                isGameFinished = true;
+                canShoot = false;
+                Debug.Log("<color=red>[FishingMinigame]</color> Hết thời gian! Thất bại minigame.");
+                
+                // Trả lao về vị trí ban đầu trước khi thoát
+                if (spearVisual != null)
+                {
+                    spearVisual.DOKill();
+                    spearVisual.DOMove(spearOriginalPos, 0.2f).OnComplete(() => {
+                        if (ViewManager.Instance != null) ViewManager.Instance.GoBack();
+                    });
+                }
+                else
+                {
+                    if (ViewManager.Instance != null) ViewManager.Instance.GoBack();
+                }
+                return;
+            }
+        }
+
         // Hệ thống chỉ nhận lệnh nếu canShoot đã được mở khóa ở hàm OnEnable trên
         if (Input.GetMouseButtonDown(0) && canShoot && !isGameFinished)
         {
@@ -89,11 +157,19 @@ public class FishingMinigame : MonoBehaviour
                 .SetEase(Ease.OutQuad)
                 .OnComplete(() =>
                 {
-                    Collider2D hit = Physics2D.OverlapPoint(touchPoint, fishLayer);
+                    Collider2D hit = Physics2D.OverlapCircle(spearVisual.position, catchRadius, fishLayer);
 
                     if (hit != null && !isGameFinished)
                     {
-                        CatchFishWithSmoothReturn(hit.gameObject);
+                        var behavior = hit.GetComponent<FishBehavior>();
+                        if (behavior != null && behavior.isToxic)
+                        {
+                            TriggerStun(hit.gameObject);
+                        }
+                        else
+                        {
+                            CatchFishWithSmoothReturn(hit.gameObject);
+                        }
                     }
                     else
                     {
@@ -103,9 +179,44 @@ public class FishingMinigame : MonoBehaviour
         }
         else
         {
-            Collider2D hit = Physics2D.OverlapPoint(touchPoint, fishLayer);
-            if (hit != null && !isGameFinished) CatchFishWithSmoothReturn(hit.gameObject);
-            else canShoot = true;
+            Collider2D hit = Physics2D.OverlapCircle(touchPoint, catchRadius, fishLayer);
+            if (hit != null && !isGameFinished)
+            {
+                var behavior = hit.GetComponent<FishBehavior>();
+                if (behavior != null && behavior.isToxic)
+                {
+                    TriggerStun(hit.gameObject);
+                }
+                else
+                {
+                    CatchFishWithSmoothReturn(hit.gameObject);
+                }
+            }
+            else
+            {
+                canShoot = true;
+            }
+        }
+    }
+
+    private void TriggerStun(GameObject toxicFish)
+    {
+        isStunned = true;
+        stunTimer = stunDuration;
+        canShoot = false;
+        
+        Debug.Log("<color=purple>[Fishing]</color> Đâm trúng cá độc! Tê liệt trong " + stunDuration + " giây.");
+
+        Destroy(toxicFish);
+
+        if (spearVisual != null)
+        {
+            spearVisual.DOKill();
+            spearVisual.DOShakePosition(0.5f, 0.2f, 15, 90f)
+                .OnComplete(() =>
+                {
+                    spearVisual.DOMove(spearOriginalPos, thrustDuration).SetEase(Ease.OutQuad);
+                });
         }
     }
 
