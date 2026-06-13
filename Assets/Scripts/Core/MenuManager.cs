@@ -23,6 +23,9 @@ public class MenuManager : MonoBehaviour
         chapterPanel.SetActive(false);
 
         CheckUnlockedChapters(); // Thiết lập trạng thái các nút ngay từ đầu
+
+        // Khởi tạo SceneController để chạy màn hình chờ startup
+        var sc = SceneController.Instance;
     }
 
     // Gắn hàm này vào sự kiện OnClick của nút "Play"

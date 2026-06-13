@@ -112,7 +112,14 @@ public class SettingsPopupController : MonoBehaviour
 
     public void GoToMainMenu()
     {
-        SceneManager.LoadScene("MainMenu");
+        if (SceneController.Instance != null)
+        {
+            SceneController.Instance.LoadScene("MainMenu");
+        }
+        else
+        {
+            SceneManager.LoadScene("MainMenu");
+        }
     }
 
     public void ResetData()
@@ -128,6 +135,13 @@ public class SettingsPopupController : MonoBehaviour
             PuzzleManager.Instance.ClearAllStates();
         }
         Scene activeScene = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(activeScene.name);
+        if (SceneController.Instance != null)
+        {
+            SceneController.Instance.LoadScene(activeScene.name);
+        }
+        else
+        {
+            SceneManager.LoadScene(activeScene.name);
+        }
     }
 }

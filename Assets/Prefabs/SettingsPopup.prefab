@@ -1153,6 +1153,7 @@ GameObject:
   - component: {fileID: 9030708648190628498}
   - component: {fileID: 8406284846850332434}
   - component: {fileID: 4673857134345374983}
+  - component: {fileID: 4967614100287791884}
   m_Layer: 0
   m_Name: BtnMainMenu
   m_TagString: Untagged
@@ -1277,6 +1278,23 @@ MonoBehaviour:
   hoverSfx: {fileID: 0}
   clickSfx: {fileID: 8300000, guid: 41b42670edd1db241bb26a8d712b2269, type: 3}
   volumeScale: 1
+--- !u!114 &4967614100287791884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5538602479435479193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b29d2b25cfb161245b20cd790f2c1750, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pressedScaleMultiplier: {x: 0.9, y: 0.9, z: 1}
+  pressDuration: 0.08
+  releaseDuration: 0.35
+  pressEase: 6
+  releaseEase: 27
 --- !u!1 &5952148548533544413
 GameObject:
   m_ObjectHideFlags: 0
@@ -1535,6 +1553,7 @@ GameObject:
   - component: {fileID: 2566928740795831659}
   - component: {fileID: 1569708232647417981}
   - component: {fileID: 8697747984534983365}
+  - component: {fileID: 5468490498225577883}
   m_Layer: 0
   m_Name: BtnReset
   m_TagString: Untagged
@@ -1659,6 +1678,23 @@ MonoBehaviour:
   hoverSfx: {fileID: 0}
   clickSfx: {fileID: 8300000, guid: 41b42670edd1db241bb26a8d712b2269, type: 3}
   volumeScale: 1
+--- !u!114 &5468490498225577883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6981229271017284543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b29d2b25cfb161245b20cd790f2c1750, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pressedScaleMultiplier: {x: 0.9, y: 0.9, z: 1}
+  pressDuration: 0.08
+  releaseDuration: 0.35
+  pressEase: 6
+  releaseEase: 27
 --- !u!1 &7356650985181754421
 GameObject:
   m_ObjectHideFlags: 0
@@ -1672,6 +1708,7 @@ GameObject:
   - component: {fileID: 5088659277205000557}
   - component: {fileID: 5947216216966173647}
   - component: {fileID: 900512131509038168}
+  - component: {fileID: 6516330747498831057}
   m_Layer: 0
   m_Name: BtnContinue
   m_TagString: Untagged
@@ -1796,6 +1833,23 @@ MonoBehaviour:
   hoverSfx: {fileID: 0}
   clickSfx: {fileID: 8300000, guid: 41b42670edd1db241bb26a8d712b2269, type: 3}
   volumeScale: 1
+--- !u!114 &6516330747498831057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7356650985181754421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b29d2b25cfb161245b20cd790f2c1750, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pressedScaleMultiplier: {x: 0.9, y: 0.9, z: 1}
+  pressDuration: 0.08
+  releaseDuration: 0.35
+  pressEase: 6
+  releaseEase: 27
 --- !u!1 &8067398553541256211
 GameObject:
   m_ObjectHideFlags: 0

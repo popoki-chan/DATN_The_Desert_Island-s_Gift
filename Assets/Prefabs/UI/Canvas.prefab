@@ -49,6 +49,7 @@ GameObject:
   - component: {fileID: 2740261090759957860}
   - component: {fileID: 6588529485582606077}
   - component: {fileID: -6842426297716757203}
+  - component: {fileID: 7809569010130877387}
   m_Layer: 5
   m_Name: Btn Setting
   m_TagString: Untagged
@@ -184,6 +185,23 @@ MonoBehaviour:
   hoverSfx: {fileID: 0}
   clickSfx: {fileID: 8300000, guid: e44316103d10da448b881bcfbe7c3019, type: 3}
   volumeScale: 1
+--- !u!114 &7809569010130877387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 683028059657275697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b29d2b25cfb161245b20cd790f2c1750, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pressedScaleMultiplier: {x: 0.9, y: 0.9, z: 1}
+  pressDuration: 0.08
+  releaseDuration: 0.35
+  pressEase: 6
+  releaseEase: 27
 --- !u!1 &884865005285443894
 GameObject:
   m_ObjectHideFlags: 0
@@ -570,6 +588,7 @@ GameObject:
   - component: {fileID: 6136568882567237016}
   - component: {fileID: 196722314125411958}
   - component: {fileID: 3706929205794733103}
+  - component: {fileID: 5651177054890432794}
   m_Layer: 0
   m_Name: BtnReset
   m_TagString: Untagged
@@ -694,6 +713,23 @@ MonoBehaviour:
   hoverSfx: {fileID: 0}
   clickSfx: {fileID: 8300000, guid: 41b42670edd1db241bb26a8d712b2269, type: 3}
   volumeScale: 1
+--- !u!114 &5651177054890432794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1815915409864972136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b29d2b25cfb161245b20cd790f2c1750, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pressedScaleMultiplier: {x: 0.9, y: 0.9, z: 1}
+  pressDuration: 0.08
+  releaseDuration: 0.35
+  pressEase: 6
+  releaseEase: 27
 --- !u!1 &1824597687708249176
 GameObject:
   m_ObjectHideFlags: 0
@@ -1289,6 +1325,7 @@ GameObject:
   - component: {fileID: 7717734620293578698}
   - component: {fileID: 4972026937483015705}
   - component: {fileID: 6792382220194712224}
+  - component: {fileID: 972533937885209009}
   m_Layer: 0
   m_Name: BtnMainMenu
   m_TagString: Untagged
@@ -1413,6 +1450,23 @@ MonoBehaviour:
   hoverSfx: {fileID: 0}
   clickSfx: {fileID: 8300000, guid: 41b42670edd1db241bb26a8d712b2269, type: 3}
   volumeScale: 1
+--- !u!114 &972533937885209009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2997488686607781372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b29d2b25cfb161245b20cd790f2c1750, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pressedScaleMultiplier: {x: 0.9, y: 0.9, z: 1}
+  pressDuration: 0.08
+  releaseDuration: 0.35
+  pressEase: 6
+  releaseEase: 27
 --- !u!1 &3146998628935396168
 GameObject:
   m_ObjectHideFlags: 0
@@ -1446,7 +1500,7 @@ RectTransform:
   m_Father: {fileID: 3872799016152959664}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 3, y: 0}
   m_SizeDelta: {x: 96, y: 74}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1789,7 +1843,7 @@ RectTransform:
   m_Father: {fileID: 5139365538960180911}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: -5.75}
   m_SizeDelta: {x: 0, y: 11.5}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1826,7 +1880,7 @@ MonoBehaviour:
   m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 0
-  m_FillAmount: 0
+  m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
@@ -1948,7 +2002,7 @@ RectTransform:
   m_Father: {fileID: 8351949308577954656}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 20, y: -0.099999905}
   m_SizeDelta: {x: -27, y: 13}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1985,7 +2039,7 @@ MonoBehaviour:
   m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 0
-  m_FillAmount: 0
+  m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
@@ -2674,6 +2728,7 @@ GameObject:
   - component: {fileID: 911140200423789620}
   - component: {fileID: 8544812825183836062}
   - component: {fileID: -3532508097987265871}
+  - component: {fileID: 1629306456211071730}
   m_Layer: 0
   m_Name: BtnContinue
   m_TagString: Untagged
@@ -2798,6 +2853,23 @@ MonoBehaviour:
   hoverSfx: {fileID: 0}
   clickSfx: {fileID: 8300000, guid: 41b42670edd1db241bb26a8d712b2269, type: 3}
   volumeScale: 1
+--- !u!114 &1629306456211071730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5152480042013767418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b29d2b25cfb161245b20cd790f2c1750, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pressedScaleMultiplier: {x: 0.9, y: 0.9, z: 1}
+  pressDuration: 0.08
+  releaseDuration: 0.35
+  pressEase: 6
+  releaseEase: 27
 --- !u!1 &5771159271729881455
 GameObject:
   m_ObjectHideFlags: 0
@@ -2963,9 +3035,9 @@ RectTransform:
   - {fileID: 3887349343390751310}
   - {fileID: 9068257656520137669}
   - {fileID: 194284438091740982}
-  - {fileID: 6150338177803841048}
   - {fileID: 6851229453773480800}
   - {fileID: 4491134544239848783}
+  - {fileID: 6150338177803841048}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -3437,7 +3509,7 @@ RectTransform:
   m_Father: {fileID: 5220372314442394770}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 96, y: 94}
   m_Pivot: {x: 0.5, y: 0.5}
