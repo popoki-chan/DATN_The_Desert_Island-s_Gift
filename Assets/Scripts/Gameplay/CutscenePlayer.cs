@@ -4,12 +4,20 @@ using DG.Tweening;
 
 public class CutscenePlayer : MonoBehaviour
 {
-    [Header("Cấu hình slide ảnh")]
-    [Tooltip("Kéo danh sách các sprite ảnh cutscene vào đây")]
+    [Header("Cấu hình slide ảnh tĩnh")]
+    [Tooltip("Kéo danh sách các sprite ảnh cutscene vào đây nếu dùng slide tĩnh")]
     public Sprite[] slides;
 
     [Tooltip("SpriteRenderer dùng để hiển thị các bức ảnh cutscene. Nếu để trống sẽ tự lấy ở GameObject này hoặc con.")]
     public SpriteRenderer targetRenderer;
+
+    [Header("Cấu hình slide dạng GameObject hoạt họa")]
+    [Tooltip("Kéo thả danh sách các GameObject phân cảnh hoạt họa vào đây. Nếu mảng này có phần tử, hệ thống sẽ ẩn/hiện GameObject tương ứng thay vì hoán đổi Sprite.")]
+    public GameObject[] animatedSlides;
+
+    [Header("Cấu hình tự động phát")]
+    [Tooltip("Tích chọn để tự động phát cutscene khi cảnh chơi được load")]
+    public bool playOnStart = false;
 
     [Header("Cấu hình hiệu ứng")]
     public float fadeDuration = 0.5f;
@@ -32,7 +40,6 @@ public class CutscenePlayer : MonoBehaviour
     private int currentIndex = 0;
     private bool isTransitioning = false;
     private bool isPlaying = false;
-    private bool isWaitingForStartClick = false;
     private float delayTimer = 0f;
     private Tween fadeTween;
 
@@ -62,6 +69,14 @@ public class CutscenePlayer : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        if (playOnStart)
+        {
+            PlayCutscene();
+        }
+    }
+
     public void PlayCutscene()
     {
         // Cache references and deactivate gameplay UI elements
@@ -75,10 +90,12 @@ public class CutscenePlayer : MonoBehaviour
         if (cachedButtonParent != null) cachedButtonParent.SetActive(false);
         if (cachedBorder != null) cachedBorder.SetActive(false);
 
-        if (slides == null || slides.Length == 0)
+        bool hasAnimatedSlides = animatedSlides != null && animatedSlides.Length > 0;
+        bool hasStaticSlides = slides != null && slides.Length > 0;
+
+        if (!hasAnimatedSlides && !hasStaticSlides)
         {
-            Debug.LogWarning("[CutscenePlayer] Không có slide nào để chạy!");
-            // Nếu không có slide, vẫn gọi hoàn thành để tránh kẹt game
+            Debug.LogWarning("[CutscenePlayer] Không có slide (ảnh hoặc GameObject) nào để chạy!");
             EndCutscene();
             return;
         }
@@ -86,15 +103,25 @@ public class CutscenePlayer : MonoBehaviour
         // Kích hoạt GameObject này để hàm Update có thể chạy
         gameObject.SetActive(true);
 
-        // Ẩn SpriteRenderer trong thời gian chờ để không che màn hình gameplay
-        if (targetRenderer != null)
+        if (hasAnimatedSlides)
         {
+            // Ẩn tất cả các slide hoạt họa đi ban đầu
+            foreach (var go in animatedSlides)
+            {
+                if (go != null) go.SetActive(false);
+            }
+        }
+        else if (targetRenderer != null)
+        {
+            // Ẩn SpriteRenderer trong thời gian chờ để không che màn hình gameplay
             targetRenderer.gameObject.SetActive(false);
         }
 
-        isWaitingForStartClick = true;
+        // Bắt đầu trình chiếu các slide ngay lập tức
+        StartPlayingSlides();
+
+        // Cài đặt thời gian trễ không cho phép skip ngay
         delayTimer = startDelay;
-        isPlaying = false;
     }
 
     private void StartPlayingSlides()
@@ -103,9 +130,11 @@ public class CutscenePlayer : MonoBehaviour
         currentIndex = 0;
         isTransitioning = false;
 
-        // Hiện lại SpriteRenderer để trình chiếu
-        if (targetRenderer != null)
+        bool hasAnimatedSlides = animatedSlides != null && animatedSlides.Length > 0;
+
+        if (!hasAnimatedSlides && targetRenderer != null)
         {
+            // Hiện lại SpriteRenderer để trình chiếu ảnh tĩnh
             targetRenderer.gameObject.SetActive(true);
         }
 
@@ -129,23 +158,13 @@ public class CutscenePlayer : MonoBehaviour
     {
         if (SettingsPopupController.IsOpen) return;
 
-        if (isWaitingForStartClick)
-        {
-            if (delayTimer > 0f)
-            {
-                delayTimer -= Time.deltaTime;
-                return;
-            }
+        if (!isPlaying) return;
 
-            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
-            {
-                isWaitingForStartClick = false;
-                StartPlayingSlides();
-            }
+        if (delayTimer > 0f)
+        {
+            delayTimer -= Time.deltaTime;
             return;
         }
-
-        if (!isPlaying) return;
 
         // Click chuột trái hoặc bấm phím Space/Enter để sang slide tiếp theo
         if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
@@ -160,7 +179,9 @@ public class CutscenePlayer : MonoBehaviour
 
         currentIndex++;
 
-        if (currentIndex < slides.Length)
+        int totalSlides = (animatedSlides != null && animatedSlides.Length > 0) ? animatedSlides.Length : (slides != null ? slides.Length : 0);
+
+        if (currentIndex < totalSlides)
         {
             // Phát âm thanh chuyển slide
             if (nextSlideSfx != null && AudioManager.Instance != null)
@@ -177,38 +198,56 @@ public class CutscenePlayer : MonoBehaviour
 
     private void ShowSlide(int index, bool useFade)
     {
-        if (targetRenderer == null || slides == null || index >= slides.Length) return;
+        bool hasAnimatedSlides = animatedSlides != null && animatedSlides.Length > 0;
 
-        if (useFade)
+        if (hasAnimatedSlides)
         {
-            isTransitioning = true;
-            fadeTween?.Kill();
-            // Smooth fade out -> change sprite -> fade in
-            fadeTween = targetRenderer.DOFade(0f, fadeDuration).OnComplete(() =>
+            if (index >= animatedSlides.Length) return;
+
+            // Kích hoạt duy nhất slide hiện tại, tắt toàn bộ slide khác
+            for (int i = 0; i < animatedSlides.Length; i++)
             {
-                if (targetRenderer != null && slides != null && index < slides.Length)
+                if (animatedSlides[i] != null)
                 {
-                    targetRenderer.sprite = slides[index];
-                    fadeTween = targetRenderer.DOFade(1f, fadeDuration).OnComplete(() =>
-                    {
-                        isTransitioning = false;
-                        fadeTween = null;
-                    });
+                    animatedSlides[i].SetActive(i == index);
                 }
-                else
-                {
-                    isTransitioning = false;
-                    fadeTween = null;
-                }
-            });
+            }
         }
         else
         {
-            targetRenderer.sprite = slides[index];
-            // Đảm bảo alpha là 1
-            Color c = targetRenderer.color;
-            c.a = 1f;
-            targetRenderer.color = c;
+            if (targetRenderer == null || slides == null || index >= slides.Length) return;
+
+            if (useFade)
+            {
+                isTransitioning = true;
+                fadeTween?.Kill();
+                // Smooth fade out -> change sprite -> fade in
+                fadeTween = targetRenderer.DOFade(0f, fadeDuration).OnComplete(() =>
+                {
+                    if (targetRenderer != null && slides != null && index < slides.Length)
+                    {
+                        targetRenderer.sprite = slides[index];
+                        fadeTween = targetRenderer.DOFade(1f, fadeDuration).OnComplete(() =>
+                        {
+                            isTransitioning = false;
+                            fadeTween = null;
+                        });
+                    }
+                    else
+                    {
+                        isTransitioning = false;
+                        fadeTween = null;
+                    }
+                });
+            }
+            else
+            {
+                targetRenderer.sprite = slides[index];
+                // Đảm bảo alpha là 1
+                Color c = targetRenderer.color;
+                c.a = 1f;
+                targetRenderer.color = c;
+            }
         }
     }
 
@@ -216,6 +255,15 @@ public class CutscenePlayer : MonoBehaviour
     {
         isPlaying = false;
         Debug.Log("[CutscenePlayer] Kết thúc cutscene!");
+
+        // Ẩn toàn bộ các slide hoạt họa đi khi hoàn tất
+        if (animatedSlides != null && animatedSlides.Length > 0)
+        {
+            foreach (var go in animatedSlides)
+            {
+                if (go != null) go.SetActive(false);
+            }
+        }
 
         // Reactivate gameplay UI if we are staying in this scene
         if (!loadNextSceneOnComplete || string.IsNullOrEmpty(nextSceneName))

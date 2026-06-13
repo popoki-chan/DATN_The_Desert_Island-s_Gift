@@ -5490,7 +5490,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &962626351
 Transform:
   m_ObjectHideFlags: 0
@@ -6592,6 +6592,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slides: []
   targetRenderer: {fileID: 389126906}
+  animatedSlides: []
+  playOnStart: 0
   fadeDuration: 0.5
   nextSlideSfx: {fileID: 0}
   onCutsceneComplete:
@@ -7766,7 +7768,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1347769382
 Transform:
   m_ObjectHideFlags: 0
@@ -8153,7 +8155,7 @@ MonoBehaviour:
   isPickable: 0
   isLocked: 0
   requiredItemId: 
-  onClickSfx: {fileID: 0}
+  onClickSfx: {fileID: 8300000, guid: e131bc534f1d62849b3634c7ab422071, type: 3}
   pickupSfx: {fileID: 0}
   failUseSfx: {fileID: 0}
   isZoomable: 0
@@ -11389,6 +11391,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1370460578830790357, guid: ba5d85ef65369b546b4fe999373cdb0a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1642264247236280046, guid: ba5d85ef65369b546b4fe999373cdb0a, type: 3}
       propertyPath: handIcon
       value: 
@@ -11421,6 +11427,18 @@ PrefabInstance:
       propertyPath: defaultNotificationSfx
       value: 
       objectReference: {fileID: 8300000, guid: ce5da229ecb310c47930f3d2f2d7b64a, type: 3}
+    - target: {fileID: 3156147185456443074, guid: ba5d85ef65369b546b4fe999373cdb0a, type: 3}
+      propertyPath: m_Color.b
+      value: 0.027450982
+      objectReference: {fileID: 0}
+    - target: {fileID: 3156147185456443074, guid: ba5d85ef65369b546b4fe999373cdb0a, type: 3}
+      propertyPath: m_Color.g
+      value: 0.09019608
+      objectReference: {fileID: 0}
+    - target: {fileID: 3156147185456443074, guid: ba5d85ef65369b546b4fe999373cdb0a, type: 3}
+      propertyPath: m_Color.r
+      value: 0.12941177
+      objectReference: {fileID: 0}
     - target: {fileID: 3264829890642077128, guid: ba5d85ef65369b546b4fe999373cdb0a, type: 3}
       propertyPath: clickSfx
       value: 

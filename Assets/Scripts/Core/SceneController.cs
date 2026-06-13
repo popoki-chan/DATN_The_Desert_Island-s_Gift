@@ -340,7 +340,7 @@ public class SceneController : Singleton<SceneController>
         
         Canvas canvas = canvasGo.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = -1; // Đặt dưới UI chính (0) nhưng trên Game World 2D
+        canvas.sortingOrder = 999; // Đặt cực cao để che phủ toàn bộ UI và game
         
         canvasGo.AddComponent<CanvasScaler>();
         canvasGo.AddComponent<GraphicRaycaster>();
@@ -353,7 +353,7 @@ public class SceneController : Singleton<SceneController>
         rect.anchorMin = Vector2.zero;
         rect.anchorMax = Vector2.one;
         rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.one;
+        rect.offsetMax = Vector2.zero; // Stretch full screen
         
         var img = panelGo.AddComponent<Image>();
         img.color = Color.black;
@@ -389,20 +389,7 @@ public class SceneController : Singleton<SceneController>
             }
         }
 
-        if (fadeCanvas == null)
-        {
-            // 2. Safe fallback: Find any CanvasGroup but filter out common UI panel names
-            var candidates = FindObjectsOfType<CanvasGroup>();
-            foreach (var candidate in candidates)
-            {
-                string name = candidate.gameObject.name.ToLower();
-                if (!name.Contains("setting") && !name.Contains("popup") && !name.Contains("inventory") && !name.Contains("tooltip"))
-                {
-                    fadeCanvas = candidate;
-                    break;
-                }
-            }
-        }
+        // Đã gỡ bỏ fallback nguy hiểm tự động tìm bất kỳ CanvasGroup nào (tránh chiếm quyền DragTutorial, Settings...)
 
         if (fadeCanvas == null)
         {
@@ -410,8 +397,10 @@ public class SceneController : Singleton<SceneController>
         }
         else
         {
-            // Cấu hình fadeCanvas có sẵn thành root Canvas độc lập với sortingOrder = -1 để chỉ che màn chơi, không che UI
+            // Cấu hình fadeCanvas có sẵn thành root Canvas độc lập với sortingOrder = 999 để che phủ toàn bộ UI và game
             GameObject go = fadeCanvas.gameObject;
+            go.SetActive(true); // Đảm bảo kích hoạt GameObject để Canvas có thể render
+            
             if (go.transform.parent != null)
             {
                 go.transform.SetParent(null, false);
@@ -420,7 +409,7 @@ public class SceneController : Singleton<SceneController>
             Canvas canvas = go.GetComponent<Canvas>();
             if (canvas == null) canvas = go.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = -1; // Dưới Canvas chính (0) nhưng trên camera game
+            canvas.sortingOrder = 999; // Che phủ toàn bộ UI
             
             if (go.GetComponent<CanvasScaler>() == null) go.AddComponent<CanvasScaler>();
             if (go.GetComponent<GraphicRaycaster>() == null) go.AddComponent<GraphicRaycaster>();

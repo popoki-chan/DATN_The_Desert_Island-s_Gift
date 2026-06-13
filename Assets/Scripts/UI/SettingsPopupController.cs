@@ -112,13 +112,20 @@ public class SettingsPopupController : MonoBehaviour
 
     public void GoToMainMenu()
     {
-        if (SceneController.Instance != null)
+        if (SceneManager.GetActiveScene().name == "MainMenu")
         {
-            SceneController.Instance.LoadScene("MainMenu");
+            Close(); // Nếu đã ở sẵn MainMenu, chỉ cần ẩn bảng Settings đi
         }
         else
         {
-            SceneManager.LoadScene("MainMenu");
+            if (SceneController.Instance != null)
+            {
+                SceneController.Instance.LoadScene("MainMenu");
+            }
+            else
+            {
+                SceneManager.LoadScene("MainMenu");
+            }
         }
     }
 

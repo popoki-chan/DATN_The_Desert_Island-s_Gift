@@ -30,19 +30,26 @@ public class ViewManager : Singleton<ViewManager>
 
     private void Start()
     {
-        foreach (GameObject view in allViews)
+        if (allViews != null)
         {
-            if (view != null) view.SetActive(false);
+            foreach (GameObject view in allViews)
+            {
+                if (view != null) view.SetActive(false);
+            }
         }
+        
         if (mainView != null)
         {
             mainView.SetActive(true);
             viewHistory.Push(mainView);
         }
 
-        backButton.gameObject.SetActive(false);
-        backButton.onClick.RemoveAllListeners();
-        backButton.onClick.AddListener(GoBack);
+        if (backButton != null)
+        {
+            backButton.gameObject.SetActive(false);
+            backButton.onClick.RemoveAllListeners();
+            backButton.onClick.AddListener(GoBack);
+        }
 
         UpdateArrowsVisibility();
     }
