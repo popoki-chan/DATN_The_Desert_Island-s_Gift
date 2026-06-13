@@ -279,7 +279,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 5b395b7c26c23d34f8ccc57952eb57aa, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 759bc6bf04eb22149b91d38a696c3ce4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1171,7 +1171,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 5b395b7c26c23d34f8ccc57952eb57aa, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 759bc6bf04eb22149b91d38a696c3ce4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1339,7 +1339,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 5b395b7c26c23d34f8ccc57952eb57aa, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 759bc6bf04eb22149b91d38a696c3ce4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1986,7 +1986,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 946321fa85ccd804c86021eecd202b9d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -4719,6 +4719,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slides: []
   targetRenderer: {fileID: 1386576895}
+  animatedSlides: []
+  playOnStart: 0
+  hideUIOnPlay: 0
   fadeDuration: 0.5
   nextSlideSfx: {fileID: 0}
   onCutsceneComplete:
@@ -4726,7 +4729,7 @@ MonoBehaviour:
       m_Calls: []
   loadNextSceneOnComplete: 0
   nextSceneName: 
-  startDelay: 2.5
+  startDelay: 3
 --- !u!4 &1377631676 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8098422152663513410, guid: ca38d3aac6f67534ead68b0b95ead6d2, type: 3}

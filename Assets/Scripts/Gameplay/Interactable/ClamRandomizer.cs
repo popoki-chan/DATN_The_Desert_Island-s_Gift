@@ -1,12 +1,28 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class ClamRandomizer : MonoBehaviour
 {
     void Start()
     {
-        // 1. Lấy tất cả các vỏ sò dưới View Chest
-        OpenContainer[] clams = GetComponentsInChildren<OpenContainer>(true);
-        if (clams == null || clams.Length == 0) return;
+        // 1. Tìm tất cả các OpenContainer có tên "Clam" thuộc scene hiện tại (kể cả active/inactive)
+        OpenContainer[] allContainers = Resources.FindObjectsOfTypeAll<OpenContainer>();
+        List<OpenContainer> clamsList = new List<OpenContainer>();
+        
+        foreach (var container in allContainers)
+        {
+            if (container != null && container.gameObject.scene == gameObject.scene && container.gameObject.name == "Clam")
+            {
+                clamsList.Add(container);
+            }
+        }
+
+        OpenContainer[] clams = clamsList.ToArray();
+        if (clams.Length == 0)
+        {
+            Debug.LogWarning("[ClamRandomizer] Không tìm thấy vỏ sò (Clam) nào trong scene!");
+            return;
+        }
 
         // 2. Tìm kiếm đối tượng oyster_meat dưới các vỏ sò
         GameObject oysterMeat = null;
@@ -29,9 +45,9 @@ public class ClamRandomizer : MonoBehaviour
             return;
         }
 
-        // 3. Chọn ngẫu nhiên vỏ sò chứa thịt
+        // 3. Chọn ngẫu nhiên vỏ sò chứa thịt trong tất cả vỏ sò của scene
         int luckyIndex = Random.Range(0, clams.Length);
-        Debug.Log($"[ClamRandomizer] Chọn vỏ sò thứ {luckyIndex} làm vỏ chứa thịt.");
+        Debug.Log($"[ClamRandomizer] Chọn vỏ sò thứ {luckyIndex} trên tổng số {clams.Length} làm vỏ chứa thịt (Tên path: {GetGameObjectPath(clams[luckyIndex].gameObject)}).");
 
         for (int i = 0; i < clams.Length; i++)
         {
@@ -57,5 +73,17 @@ public class ClamRandomizer : MonoBehaviour
                 clam.itemToReveal = null;
             }
         }
+    }
+
+    private string GetGameObjectPath(GameObject obj)
+    {
+        string path = obj.name;
+        Transform parent = obj.transform.parent;
+        while (parent != null)
+        {
+            path = parent.name + "/" + path;
+            parent = parent.parent;
+        }
+        return path;
     }
 }

@@ -225,16 +225,34 @@ public class TimelineCutsceneController : MonoBehaviour
         if (skipButton != null)
             skipButton.gameObject.SetActive(false);
 
-        // Fade Out màn hình trước khi load màn chơi
-        if (fadeOverlay != null)
+        onCutsceneComplete?.Invoke();
+
+        // Chuyển scene nếu cần
+        if (loadNextSceneOnComplete && !string.IsNullOrEmpty(nextSceneName))
         {
-            fadeOverlay.gameObject.SetActive(true);
-            fadeOverlay.blocksRaycasts = true;
-            fadeOverlay.DOFade(1f, fadeDuration).SetEase(Ease.InOutSine).OnComplete(FinishAndLoadNextScene);
+            if (SceneController.Instance != null)
+            {
+                // Sử dụng trực tiếp SceneController để chuyển cảnh mượt mà, tránh nhấp nháy màn xanh và lặp fade
+                SceneController.Instance.LoadScene(nextSceneName);
+            }
+            else
+            {
+                UnityEngine.SceneManagement.SceneManager.LoadScene(nextSceneName);
+            }
         }
         else
         {
-            FinishAndLoadNextScene();
+            // Fallback nếu không chuyển scene
+            if (fadeOverlay != null)
+            {
+                fadeOverlay.gameObject.SetActive(true);
+                fadeOverlay.blocksRaycasts = true;
+                fadeOverlay.DOFade(1f, fadeDuration).SetEase(Ease.InOutSine).OnComplete(FinishAndLoadNextScene);
+            }
+            else
+            {
+                FinishAndLoadNextScene();
+            }
         }
     }
 
@@ -261,16 +279,5 @@ public class TimelineCutsceneController : MonoBehaviour
         // Trả camera về view gameplay
         if (ViewManager.Instance != null)
             ViewManager.Instance.GoBack();
-
-        onCutsceneComplete?.Invoke();
-
-        // Chuyển scene nếu cần
-        if (loadNextSceneOnComplete && !string.IsNullOrEmpty(nextSceneName))
-        {
-            if (SceneController.Instance != null)
-                SceneController.Instance.LoadScene(nextSceneName);
-            else
-                UnityEngine.SceneManagement.SceneManager.LoadScene(nextSceneName);
-        }
     }
 }

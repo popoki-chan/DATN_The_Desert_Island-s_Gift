@@ -1454,6 +1454,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slides: []
   targetRenderer: {fileID: 351831095}
+  animatedSlides: []
+  playOnStart: 0
+  hideUIOnPlay: 0
   fadeDuration: 0.5
   nextSlideSfx: {fileID: 0}
   onCutsceneComplete:
@@ -1461,7 +1464,7 @@ MonoBehaviour:
       m_Calls: []
   loadNextSceneOnComplete: 1
   nextSceneName: Chapter3
-  startDelay: 2.5
+  startDelay: 3
 --- !u!1 &1699529704
 GameObject:
   m_ObjectHideFlags: 0

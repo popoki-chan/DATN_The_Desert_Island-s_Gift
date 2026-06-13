@@ -19,6 +19,9 @@ public class CutscenePlayer : MonoBehaviour
     [Tooltip("Tích chọn để tự động phát cutscene khi cảnh chơi được load")]
     public bool playOnStart = false;
 
+    [Tooltip("Nếu tích chọn, sẽ tự động ẩn UI gameplay khi phát cutscene")]
+    public bool hideUIOnPlay = true;
+
     [Header("Cấu hình hiệu ứng")]
     public float fadeDuration = 0.5f;
     [Tooltip("Âm thanh khi chuyển slide")]
@@ -79,26 +82,22 @@ public class CutscenePlayer : MonoBehaviour
 
     public void PlayCutscene()
     {
-        // Cache references and deactivate gameplay UI elements
-        cachedInventoryPanel = GameObject.Find("InventoryPanel");
-        cachedBtnSetting = GameObject.Find("Btn Setting");
-        cachedButtonParent = GameObject.Find("Button");
-        cachedBorder = GameObject.Find("Border");
+        if (hideUIOnPlay)
+        {
+            // Cache references and deactivate gameplay UI elements
+            cachedInventoryPanel = GameObject.Find("InventoryPanel");
+            cachedBtnSetting = GameObject.Find("Btn Setting");
+            cachedButtonParent = GameObject.Find("Button");
+            cachedBorder = GameObject.Find("Border");
 
-        if (cachedInventoryPanel != null) cachedInventoryPanel.SetActive(false);
-        if (cachedBtnSetting != null) cachedBtnSetting.SetActive(false);
-        if (cachedButtonParent != null) cachedButtonParent.SetActive(false);
-        if (cachedBorder != null) cachedBorder.SetActive(false);
+            if (cachedInventoryPanel != null) cachedInventoryPanel.SetActive(false);
+            if (cachedBtnSetting != null) cachedBtnSetting.SetActive(false);
+            if (cachedButtonParent != null) cachedButtonParent.SetActive(false);
+            if (cachedBorder != null) cachedBorder.SetActive(false);
+        }
 
         bool hasAnimatedSlides = animatedSlides != null && animatedSlides.Length > 0;
         bool hasStaticSlides = slides != null && slides.Length > 0;
-
-        if (!hasAnimatedSlides && !hasStaticSlides)
-        {
-            Debug.LogWarning("[CutscenePlayer] Không có slide (ảnh hoặc GameObject) nào để chạy!");
-            EndCutscene();
-            return;
-        }
 
         // Kích hoạt GameObject này để hàm Update có thể chạy
         gameObject.SetActive(true);
@@ -131,15 +130,16 @@ public class CutscenePlayer : MonoBehaviour
         isTransitioning = false;
 
         bool hasAnimatedSlides = animatedSlides != null && animatedSlides.Length > 0;
+        bool hasStaticSlides = slides != null && slides.Length > 0;
 
-        if (!hasAnimatedSlides && targetRenderer != null)
+        if (!hasAnimatedSlides && targetRenderer != null && hasStaticSlides)
         {
             // Hiện lại SpriteRenderer để trình chiếu ảnh tĩnh
             targetRenderer.gameObject.SetActive(true);
         }
 
-        // Chuyển góc nhìn camera sang View này
-        if (ViewManager.Instance != null)
+        // Chuyển góc nhìn camera sang View này CHỈ KHI thực sự có slide để hiển thị
+        if ((hasAnimatedSlides || hasStaticSlides) && ViewManager.Instance != null)
         {
             ViewManager.Instance.ChangeView(gameObject);
             
@@ -150,8 +150,11 @@ public class CutscenePlayer : MonoBehaviour
             }
         }
 
-        // Hiển thị slide đầu tiên
-        ShowSlide(currentIndex, false);
+        // Hiển thị slide đầu tiên nếu có
+        if (hasAnimatedSlides || hasStaticSlides)
+        {
+            ShowSlide(currentIndex, false);
+        }
     }
 
     void Update()
@@ -163,6 +166,17 @@ public class CutscenePlayer : MonoBehaviour
         if (delayTimer > 0f)
         {
             delayTimer -= Time.deltaTime;
+            
+            // Nếu hết thời gian trễ và không có slide nào để chạy, tự động kết thúc luôn để chuyển cảnh
+            if (delayTimer <= 0f)
+            {
+                bool hasAnimatedSlides = animatedSlides != null && animatedSlides.Length > 0;
+                bool hasStaticSlides = slides != null && slides.Length > 0;
+                if (!hasAnimatedSlides && !hasStaticSlides)
+                {
+                    EndCutscene();
+                }
+            }
             return;
         }
 
@@ -266,7 +280,7 @@ public class CutscenePlayer : MonoBehaviour
         }
 
         // Reactivate gameplay UI if we are staying in this scene
-        if (!loadNextSceneOnComplete || string.IsNullOrEmpty(nextSceneName))
+        if (hideUIOnPlay && (!loadNextSceneOnComplete || string.IsNullOrEmpty(nextSceneName)))
         {
             if (cachedInventoryPanel != null) cachedInventoryPanel.SetActive(true);
             if (cachedBtnSetting != null) cachedBtnSetting.SetActive(true);
