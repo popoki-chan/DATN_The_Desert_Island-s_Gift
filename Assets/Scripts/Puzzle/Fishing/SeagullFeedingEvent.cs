@@ -36,6 +36,7 @@ public class SeagullFeedingEvent : MonoBehaviour
     private SpriteRenderer seagullSpriteRenderer;
     private Sprite originalSprite;
     private Vector3 originalWorldScale = Vector3.one;
+    private Sequence seagullSeq;
 
     void Awake()
     {
@@ -89,7 +90,9 @@ public class SeagullFeedingEvent : MonoBehaviour
             }
 
             seagullTransform.gameObject.SetActive(true);
-            Sequence seagullSequence = DOTween.Sequence();
+            seagullSeq?.Kill();
+            seagullSeq = DOTween.Sequence();
+            Sequence seagullSequence = seagullSeq;
 
             seagullSequence.Append(seagullTransform.DOMove(eatPoint.position, flyDownDuration).SetEase(Ease.OutQuad));
 
@@ -167,6 +170,8 @@ public class SeagullFeedingEvent : MonoBehaviour
         {
             coreLogic.OnDefaultInteract -= HandleFishPlaced;
         }
+        seagullSeq?.Kill();
+        seagullSeq = null;
         if (seagullTransform != null)
         {
             seagullTransform.DOKill();

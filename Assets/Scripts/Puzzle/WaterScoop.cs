@@ -21,6 +21,7 @@ public class WaterScoop : MonoBehaviour
     public Item waterCoconutItem; // SỬA Ở ĐÂY: Nhận trực tiếp class Item của bạn
 
     private Interactable coreLogic;
+    private Sequence scoopSeq;
 
     void Awake()
     {
@@ -35,6 +36,18 @@ public class WaterScoop : MonoBehaviour
     void OnDisable()
     {
         if (coreLogic != null) coreLogic.OnDefaultInteract -= StartScooping;
+        scoopSeq?.Kill();
+        scoopSeq = null;
+        if (scoopAnimationObject != null)
+            scoopAnimationObject.transform.DOKill();
+    }
+
+    void OnDestroy()
+    {
+        scoopSeq?.Kill();
+        scoopSeq = null;
+        if (scoopAnimationObject != null)
+            scoopAnimationObject.transform.DOKill();
     }
 
     private void StartScooping()
@@ -60,6 +73,7 @@ public class WaterScoop : MonoBehaviour
                 Vector3 originalRot = scoopAnimationObject.transform.localEulerAngles;
                 
                 Sequence seq = DOTween.Sequence();
+                scoopSeq = seq;
                 
                 // Dip down into water and rotate
                 seq.Append(scoopAnimationObject.transform.DOLocalMove(new Vector3(originalPos.x, originalPos.y - 0.7f, originalPos.z), 0.4f).SetEase(Ease.InQuad));

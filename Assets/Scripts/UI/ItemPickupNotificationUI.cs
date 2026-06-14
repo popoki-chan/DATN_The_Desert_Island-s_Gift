@@ -18,6 +18,7 @@ public class ItemPickupNotificationUI : MonoBehaviour
     public AudioClip defaultNotificationSfx;
 
     private Sequence activeSequence;
+    private Inventory cachedInventory;
 
     void Start()
     {
@@ -30,15 +31,17 @@ public class ItemPickupNotificationUI : MonoBehaviour
         }
         if (Inventory.Instance != null)
         {
-            Inventory.Instance.OnItemAdded += HandleItemAdded;
+            cachedInventory = Inventory.Instance;
+            cachedInventory.OnItemAdded += HandleItemAdded;
         }
     }
 
     void OnDestroy()
     {
-        if (Inventory.Instance != null)
+        if (cachedInventory != null)
         {
-            Inventory.Instance.OnItemAdded -= HandleItemAdded;
+            cachedInventory.OnItemAdded -= HandleItemAdded;
+            cachedInventory = null;
         }
         activeSequence?.Kill();
     }

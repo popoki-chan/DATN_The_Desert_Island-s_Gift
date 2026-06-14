@@ -23,6 +23,7 @@ public class InventoryUI : Singleton<InventoryUI>
 
     // Mảng lưu trữ 6 slot cố định
     private GameObject[] allSlots;
+    private Inventory cachedInventory;
 
     protected override void Awake()
     {
@@ -53,10 +54,11 @@ public class InventoryUI : Singleton<InventoryUI>
         // 2. Đăng ký sự kiện với Inventory core
         if (Inventory.Instance != null)
         {
-            Inventory.Instance.OnItemAdded += OnItemAdded;
-            Inventory.Instance.OnItemRemoved += OnItemRemoved;
-            Inventory.Instance.OnInventoryChanged += RefreshAll;
-            Inventory.Instance.OnItemSelected += HandleItemSelected;
+            cachedInventory = Inventory.Instance;
+            cachedInventory.OnItemAdded += OnItemAdded;
+            cachedInventory.OnItemRemoved += OnItemRemoved;
+            cachedInventory.OnInventoryChanged += RefreshAll;
+            cachedInventory.OnItemSelected += HandleItemSelected;
 
             RefreshAll(); // Cập nhật lại UI lỡ Inventory đã có đồ từ trước
         }
@@ -64,12 +66,13 @@ public class InventoryUI : Singleton<InventoryUI>
 
     protected override void OnDestroy()
     {
-        if (Inventory.Instance != null)
+        if (cachedInventory != null)
         {
-            Inventory.Instance.OnItemAdded -= OnItemAdded;
-            Inventory.Instance.OnItemRemoved -= OnItemRemoved;
-            Inventory.Instance.OnInventoryChanged -= RefreshAll;
-            Inventory.Instance.OnItemSelected -= HandleItemSelected;
+            cachedInventory.OnItemAdded -= OnItemAdded;
+            cachedInventory.OnItemRemoved -= OnItemRemoved;
+            cachedInventory.OnInventoryChanged -= RefreshAll;
+            cachedInventory.OnItemSelected -= HandleItemSelected;
+            cachedInventory = null;
         }
         base.OnDestroy();
     }

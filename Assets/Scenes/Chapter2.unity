@@ -532,7 +532,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &772327182
 Transform:
   m_ObjectHideFlags: 0
@@ -1097,7 +1097,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &1009397385
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1338,7 +1338,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1128001421
 Transform:
   m_ObjectHideFlags: 0
@@ -1566,7 +1566,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1245736648
 Transform:
   m_ObjectHideFlags: 0
@@ -1892,7 +1892,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_Sprite: {fileID: 21300000, guid: fb6e9f3e0108c0f4f9df9893d5c694f8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -2713,7 +2713,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2079191407
 Transform:
   m_ObjectHideFlags: 0
@@ -4822,6 +4822,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Background (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 5847856918077356165, guid: 2221a0e3e81452d40ac4cb0fc7bb9a76, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.34
+      objectReference: {fileID: 0}
     - target: {fileID: 6592294273105683457, guid: 2221a0e3e81452d40ac4cb0fc7bb9a76, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -5257,7 +5261,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &4332098482331894016
 GameObject:
   m_ObjectHideFlags: 0
@@ -5957,7 +5961,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &5301157301087344968
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -8438,6 +8442,7 @@ MonoBehaviour:
   cutscenePlayer: {fileID: 1523371691}
   sceneWaterDrop: {fileID: 912708989}
   waterSFX: {fileID: 8300000, guid: 9c849e6a539d9094db276435d814c539, type: 3}
+  digSFX: {fileID: 8300000, guid: c07e27de5b8de384ca718ea230a02474, type: 3}
 --- !u!1 &9182564010319763161
 GameObject:
   m_ObjectHideFlags: 0

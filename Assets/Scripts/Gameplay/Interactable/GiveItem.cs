@@ -31,6 +31,7 @@ public class GiveItem : MonoBehaviour
 
     private Interactable coreLogic;
     private SkeletonAnimation skeletonAnimation;
+    private Sequence runSeq;
 
     void Awake()
     {
@@ -46,6 +47,9 @@ public class GiveItem : MonoBehaviour
     void OnDisable()
     {
         if (coreLogic != null) coreLogic.OnDefaultInteract -= HandleItemGiven;
+        runSeq?.Kill();
+        runSeq = null;
+        transform.DOKill();
     }
 
     private void HandleItemGiven()
@@ -70,7 +74,8 @@ public class GiveItem : MonoBehaviour
                 skeletonAnimation.AnimationState.SetAnimation(0, spineRunAnimation, loopSpineAnim);
             }
 
-            Sequence runSeq = DOTween.Sequence();
+            runSeq?.Kill();
+            runSeq = DOTween.Sequence();
             runSeq.Append(transform.DOMove(escapePoint.position, runDuration).SetEase(runEase));
 
             runSeq.AppendCallback(() =>
@@ -133,6 +138,8 @@ public class GiveItem : MonoBehaviour
 
     void OnDestroy()
     {
+        runSeq?.Kill();
+        runSeq = null;
         transform.DOKill();
     }
 }

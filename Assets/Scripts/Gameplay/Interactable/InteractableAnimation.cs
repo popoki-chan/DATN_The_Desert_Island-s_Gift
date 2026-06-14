@@ -64,6 +64,12 @@ public class InteractableAnimation : MonoBehaviour
     void OnDisable()
     {
         if (coreLogic != null) coreLogic.OnDefaultInteract -= TriggerFeedback;
+        transform.DOKill();
+        if (shakeCoroutine != null)
+        {
+            StopCoroutine(shakeCoroutine);
+            shakeCoroutine = null;
+        }
     }
 
     [ContextMenu("Test Trigger Feedback")]

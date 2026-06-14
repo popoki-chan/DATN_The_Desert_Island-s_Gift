@@ -717,8 +717,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 1
   targetView: {fileID: 6491978386544669564}
+  syncTarget: {fileID: 0}
 --- !u!1 &1308899330003702825
 GameObject:
   m_ObjectHideFlags: 0
@@ -815,8 +818,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 1
   targetView: {fileID: 7024457860118143771}
+  syncTarget: {fileID: 0}
 --- !u!1 &1533196141692297285
 GameObject:
   m_ObjectHideFlags: 0
@@ -1143,8 +1149,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 1
   targetView: {fileID: 4408146429124762426}
+  syncTarget: {fileID: 0}
 --- !u!1 &3165285329025399504
 GameObject:
   m_ObjectHideFlags: 0
@@ -1499,8 +1508,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 0
   targetView: {fileID: 0}
+  syncTarget: {fileID: 0}
 --- !u!114 &5722578476711074345
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1516,6 +1528,8 @@ MonoBehaviour:
   fishItemId: fish
   fishOnRockVisual: {fileID: 7562105734913409879}
   seagullTransform: {fileID: 2677541041222753057}
+  fishHoldPoint: {fileID: 0}
+  flyingSprite: {fileID: 0}
   eatPoint: {fileID: 7681019499583105373}
   flyAwayPoint: {fileID: 3876933695297867418}
   flyDownDuration: 1.5
@@ -1524,6 +1538,7 @@ MonoBehaviour:
   mapPoopObject: {fileID: 364460926694257104}
   poopDropPoint: {fileID: 0}
   poopFallDuration: 0.4
+  poopSFX: {fileID: 0}
 --- !u!1 &3778866151407684477
 GameObject:
   m_ObjectHideFlags: 0
@@ -1689,8 +1704,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 0
   targetView: {fileID: 0}
+  syncTarget: {fileID: 0}
 --- !u!114 &3017097221193482086
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1994,6 +2012,12 @@ MonoBehaviour:
     spawnDelay: 1
     swimSpeed: 12
   delayBetweenWaves: 2
+  toxicFishChance: 0.25
+  toxicColor: {r: 0.7, g: 0.2, b: 0.9, a: 1}
+  minAmplitude: 0.2
+  maxAmplitude: 0.6
+  minFrequency: 1.5
+  maxFrequency: 3.5
   spriteFacesRightInitially: 0
 --- !u!114 &6921702622285996355
 MonoBehaviour:
@@ -2013,8 +2037,12 @@ MonoBehaviour:
   fishLayer:
     serializedVersion: 2
     m_Bits: 64
+  catchRadius: 0.35
   fishermanQuestScript: {fileID: 152946278236373145}
   autoReturnDelay: 3
+  timeLimit: 30
+  stunDuration: 2
+  timeBarFill: {fileID: 0}
 --- !u!1 &4294492709921274424
 GameObject:
   m_ObjectHideFlags: 0
@@ -2722,8 +2750,11 @@ MonoBehaviour:
   isLocked: 1
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 0
   targetView: {fileID: 0}
+  syncTarget: {fileID: 0}
 --- !u!114 &2345387616202205700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2742,11 +2773,20 @@ MonoBehaviour:
     visualOther: {fileID: 0}
     hideVisualNow: {fileID: 7178325748577208900}
     hideVisualOther: {fileID: 0}
+    hasCustomAnimation: 0
+    onStepActivated:
+      m_PersistentCalls:
+        m_Calls: []
   - requiredItemId: sharp_rock_ch2
     visualNow: {fileID: 7178325748577208900}
     visualOther: {fileID: 0}
     hideVisualNow: {fileID: 5432333654991621785}
     hideVisualOther: {fileID: 0}
+    hasCustomAnimation: 0
+    onStepActivated:
+      m_PersistentCalls:
+        m_Calls: []
+  finalViewToOpen: {fileID: 0}
   onPuzzleCompleted:
     m_PersistentCalls:
       m_Calls:
@@ -2774,6 +2814,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  cutscenePlayer: {fileID: 0}
 --- !u!114 &2855689194611452642
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2906,8 +2947,11 @@ MonoBehaviour:
   isLocked: 1
   requiredItemId: coconut_shell
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 0
   targetView: {fileID: 0}
+  syncTarget: {fileID: 0}
 --- !u!114 &5435327827749990101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3122,7 +3166,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.82, y: 0.85}
+    oldSize: {x: 2.72, y: 2.55}
     newSize: {x: 0.82, y: 0.85}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -3160,8 +3204,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 0
   targetView: {fileID: 0}
+  syncTarget: {fileID: 0}
 --- !u!114 &7456227067308226930
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3515,7 +3562,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.9535268, y: 0.78415793}
-    oldSize: {x: 5.83, y: 1.21}
+    oldSize: {x: 5.97, y: 1.25}
     newSize: {x: 5.83, y: 1.21}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -3542,8 +3589,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 0
   targetView: {fileID: 0}
+  syncTarget: {fileID: 0}
 --- !u!114 &4965395444195346169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3902,8 +3952,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 0
   targetView: {fileID: 0}
+  syncTarget: {fileID: 0}
 --- !u!114 &2197130547543175730
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4408,8 +4461,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 0
   targetView: {fileID: 0}
+  syncTarget: {fileID: 0}
 --- !u!114 &1836021272895966044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4534,8 +4590,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 1
   targetView: {fileID: 7942724467571684995}
+  syncTarget: {fileID: 0}
 --- !u!1 &8348670770938730638
 GameObject:
   m_ObjectHideFlags: 0
@@ -4637,8 +4696,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 0
   targetView: {fileID: 0}
+  syncTarget: {fileID: 0}
 --- !u!212 &383942706808127754
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -4710,6 +4772,11 @@ MonoBehaviour:
   toolDiggingVisual: {fileID: 3125999310655720754}
   placedSeedVisual: {fileID: 992791720612759394}
   seedlingVisual: {fileID: 8654726419966550175}
+  seedlingLv2Visual: {fileID: 0}
+  mapDirtMoundVisual: {fileID: 0}
+  mapPlacedSeedVisual: {fileID: 0}
+  mapSeedlingVisual: {fileID: 0}
+  mapSeedlingLv2Visual: {fileID: 0}
   leftOffset: -4
   downOffset: 1.5
   rightOffset: 4
@@ -4719,6 +4786,13 @@ MonoBehaviour:
   stabDuration: 0.2
   dragDuration: 0.5
   resetDuration: 0.2
+  onPlantingCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  cutscenePlayer: {fileID: 0}
+  sceneWaterDrop: {fileID: 0}
+  waterSFX: {fileID: 0}
+  digSFX: {fileID: 8300000, guid: c07e27de5b8de384ca718ea230a02474, type: 3}
 --- !u!1 &8548208252470711909
 GameObject:
   m_ObjectHideFlags: 0
@@ -4842,7 +4916,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.07, y: 0.71}
+    oldSize: {x: 6.43, y: 2.13}
     newSize: {x: 2.07, y: 0.71}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -4886,8 +4960,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 0
   targetView: {fileID: 0}
+  syncTarget: {fileID: 0}
 --- !u!1 &8654726419966550175
 GameObject:
   m_ObjectHideFlags: 0
@@ -5093,8 +5170,8 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 3.29, y: 8.09}
+    pivot: {x: 0.65, y: 0.5}
+    oldSize: {x: 6.94, y: 15.52}
     newSize: {x: 3.29, y: 8.09}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -5121,8 +5198,11 @@ MonoBehaviour:
   isLocked: 0
   requiredItemId: 
   onClickSfx: {fileID: 0}
+  pickupSfx: {fileID: 0}
+  failUseSfx: {fileID: 0}
   isZoomable: 1
   targetView: {fileID: 404805073091154116}
+  syncTarget: {fileID: 0}
 --- !u!1 &8876954902767635411
 GameObject:
   m_ObjectHideFlags: 0

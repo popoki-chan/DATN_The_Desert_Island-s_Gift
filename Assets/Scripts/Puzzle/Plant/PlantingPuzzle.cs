@@ -52,6 +52,9 @@ public class PlantingPuzzle : MonoBehaviour
     public GameObject sceneWaterDrop;
     public AudioClip waterSFX;
 
+    [Header("8. Hiệu ứng đào đất")]
+    public AudioClip digSFX;
+
     private Interactable interactable;
     private int puzzleStep = 0; // 0: Cát phẳng, 1: Ụ đất, 2: Hạt nằm trên đất, 3: Chờ mọc mầm 2
 
@@ -62,16 +65,10 @@ public class PlantingPuzzle : MonoBehaviour
 
     void Start()
     {
-        if (dirtMoundVisual != null) dirtMoundVisual.transform.localScale = Vector3.zero;
-        if (toolDiggingVisual != null) toolDiggingVisual.SetActive(false);
-        if (placedSeedVisual != null) placedSeedVisual.SetActive(false);
-        if (seedlingVisual != null) seedlingVisual.SetActive(false);
-        if (seedlingLv2Visual != null) seedlingLv2Visual.SetActive(false);
+        if (interactable == null) interactable = GetComponent<Interactable>();
+        interactable.id = "planting_puzzle";
 
-        if (mapDirtMoundVisual != null) mapDirtMoundVisual.transform.localScale = Vector3.zero;
-        if (mapPlacedSeedVisual != null) mapPlacedSeedVisual.SetActive(false);
-        if (mapSeedlingVisual != null) mapSeedlingVisual.SetActive(false);
-        if (mapSeedlingLv2Visual != null) mapSeedlingLv2Visual.SetActive(false);
+        RestoreState();
 
         if (sceneWaterDrop == null)
         {
@@ -106,6 +103,17 @@ public class PlantingPuzzle : MonoBehaviour
 #endif
         }
 
+        if (digSFX == null)
+        {
+            digSFX = Resources.Load<AudioClip>("Sounds/SFX/sfx_digging");
+#if UNITY_EDITOR
+            if (digSFX == null)
+            {
+                digSFX = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Sounds/SFX/sfx_digging.MP3");
+            }
+#endif
+        }
+
         interactable.requiredItemId = digToolId;
         interactable.isLocked = true;
         interactable.description = "Bãi cát chỗ này trông có vẻ mềm và dễ xới hơn bình thường...";
@@ -127,11 +135,15 @@ public class PlantingPuzzle : MonoBehaviour
                 Vector3 toolStartPos = toolDiggingVisual.transform.localPosition;
                 Vector3 toolStartRot = toolDiggingVisual.transform.localEulerAngles;
 
+                if (dirtMoundVisual != null) dirtMoundVisual.SetActive(true);
+                if (mapDirtMoundVisual != null) mapDirtMoundVisual.SetActive(true);
+
                 for (int i = 0; i < 3; i++)
                 {
                     float currentDirtScale = (i + 1) / 3f;
 
                     Vector3 stabPos = toolStartPos + new Vector3(-leftOffset, -downOffset, 0);
+                    digSequence.AppendCallback(() => { PlayDigSFX(); });
                     digSequence.Append(toolDiggingVisual.transform.DOLocalMove(stabPos, stabDuration).SetEase(Ease.InQuad));
                     digSequence.Join(toolDiggingVisual.transform.DOLocalRotate(new Vector3(0, 0, stabAngle), stabDuration));
                     digSequence.AppendCallback(() => { transform.DOPunchScale(new Vector3(0.05f, -0.02f, 0), 0.1f, 1); });
@@ -161,6 +173,7 @@ public class PlantingPuzzle : MonoBehaviour
                 interactable.isLocked = true;
                 interactable.description = "Một ụ đất tơi xốp vừa được vun lên. Giờ chỉ cần hạt giống...";
                 puzzleStep = 1;
+                PuzzleManager.Instance?.SetState("planting_dug", true);
             });
         }
 
@@ -184,6 +197,7 @@ public class PlantingPuzzle : MonoBehaviour
             interactable.description = "Hạt giống đã nằm gọn trong đất. Giờ nó cần một ít nước ngọt để thức tỉnh...";
 
             puzzleStep = 2; // Chuyển sang chờ tưới nước
+            PuzzleManager.Instance?.SetState("planting_seeded", true);
         }
 
         // --- BƯỚC 3: TƯỚI NƯỚC (NẢY MẦM 1) ---
@@ -207,6 +221,9 @@ public class PlantingPuzzle : MonoBehaviour
             interactable.OnDefaultInteract -= HandleInteraction;
 
             onPlantingCompleted?.Invoke();
+            
+            PuzzleManager.Instance?.SetState("planting_completed", true);
+
             if (cutscenePlayer != null)
             {
                 cutscenePlayer.PlayCutscene();
@@ -276,13 +293,111 @@ public class PlantingPuzzle : MonoBehaviour
         interactable.isLocked = false;
         interactable.description = "Mầm cây con đã mọc lên. Hãy thử chạm vào nó xem sao...";
         puzzleStep = 3;
+        PuzzleManager.Instance?.SetState("planting_watered", true);
+    }
+
+    private void RestoreState()
+    {
+        if (interactable == null) interactable = GetComponent<Interactable>();
+
+        if (toolDiggingVisual != null) toolDiggingVisual.SetActive(false);
+
+        bool isCompleted = PuzzleManager.Instance != null && PuzzleManager.Instance.GetState("planting_completed");
+        bool isWatered = PuzzleManager.Instance != null && PuzzleManager.Instance.GetState("planting_watered");
+        bool isSeeded = PuzzleManager.Instance != null && PuzzleManager.Instance.GetState("planting_seeded");
+        bool isDug = PuzzleManager.Instance != null && PuzzleManager.Instance.GetState("planting_dug");
+
+        if (isCompleted)
+        {
+            puzzleStep = 3;
+            SetVisualsState(dirtMoundScale: 1f, seedActive: false, seedlingActive: false, seedlingLv2Active: true);
+            
+            interactable.requiredItemId = "";
+            interactable.isLocked = true;
+            interactable.description = "Cây non đã lớn hẳn, tràn đầy sức sống linh thiêng!";
+            interactable.OnDefaultInteract -= HandleInteraction;
+        }
+        else if (isWatered)
+        {
+            puzzleStep = 3;
+            SetVisualsState(dirtMoundScale: 1f, seedActive: false, seedlingActive: true, seedlingLv2Active: false);
+
+            interactable.requiredItemId = "";
+            interactable.isLocked = false;
+            interactable.description = "Mầm cây con đã mọc lên. Hãy thử chạm vào nó xem sao...";
+        }
+        else if (isSeeded)
+        {
+            puzzleStep = 2;
+            SetVisualsState(dirtMoundScale: 1f, seedActive: true, seedlingActive: false, seedlingLv2Active: false);
+
+            interactable.requiredItemId = waterItemId;
+            interactable.isLocked = true;
+            interactable.description = "Hạt giống đã nằm gọn trong đất. Giờ nó cần một ít nước ngọt để thức tỉnh...";
+        }
+        else if (isDug)
+        {
+            puzzleStep = 1;
+            SetVisualsState(dirtMoundScale: 1f, seedActive: false, seedlingActive: false, seedlingLv2Active: false);
+
+            interactable.requiredItemId = seedItemId;
+            interactable.isLocked = true;
+            interactable.description = "Một ụ đất tơi xốp vừa được vun lên. Giờ chỉ cần hạt giống...";
+        }
+        else
+        {
+            puzzleStep = 0;
+            SetVisualsState(dirtMoundScale: 0f, seedActive: false, seedlingActive: false, seedlingLv2Active: false);
+
+            interactable.requiredItemId = digToolId;
+            interactable.isLocked = true;
+            interactable.description = "Bãi cát chỗ này trông có vẻ mềm và dễ xới hơn bình thường...";
+        }
+    }
+
+    private void SetVisualsState(float dirtMoundScale, bool seedActive, bool seedlingActive, bool seedlingLv2Active)
+    {
+        if (dirtMoundVisual != null)
+        {
+            dirtMoundVisual.transform.localScale = new Vector3(dirtMoundScale, dirtMoundScale, 1f);
+            dirtMoundVisual.SetActive(dirtMoundScale > 0f);
+        }
+        if (placedSeedVisual != null) placedSeedVisual.SetActive(seedActive);
+        if (seedlingVisual != null) seedlingVisual.SetActive(seedlingActive);
+        if (seedlingLv2Visual != null) seedlingLv2Visual.SetActive(seedlingLv2Active);
+
+        if (mapDirtMoundVisual != null)
+        {
+            mapDirtMoundVisual.transform.localScale = new Vector3(dirtMoundScale, dirtMoundScale, 1f);
+            mapDirtMoundVisual.SetActive(dirtMoundScale > 0f);
+        }
+        if (mapPlacedSeedVisual != null) mapPlacedSeedVisual.SetActive(seedActive);
+        if (mapSeedlingVisual != null) mapSeedlingVisual.SetActive(seedlingActive);
+        if (mapSeedlingLv2Visual != null) mapSeedlingLv2Visual.SetActive(seedlingLv2Active);
+    }
+
+    private void PlayDigSFX()
+    {
+        if (digSFX != null)
+        {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX(digSFX);
+            }
+            else if (Camera.main != null)
+            {
+                AudioSource.PlayClipAtPoint(digSFX, Camera.main.transform.position);
+            }
+        }
     }
 
     void OnDisable()
     {
+        transform.DOKill();
         if (toolDiggingVisual != null) toolDiggingVisual.transform.DOKill();
         if (dirtMoundVisual != null) dirtMoundVisual.transform.DOKill();
         if (placedSeedVisual != null) placedSeedVisual.transform.DOKill();
+        if (sceneWaterDrop != null) sceneWaterDrop.transform.DOKill();
 
         if (mapDirtMoundVisual != null) mapDirtMoundVisual.transform.DOKill();
         if (mapPlacedSeedVisual != null) mapPlacedSeedVisual.transform.DOKill();

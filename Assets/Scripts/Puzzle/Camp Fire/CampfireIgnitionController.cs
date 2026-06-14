@@ -32,6 +32,7 @@ public class CampfireIgnitionController : MonoBehaviour
     private Sprite generatedGlowSprite;
     private Sprite generatedSmokeSprite;
     private Vector3 originalLensScale = Vector3.one;
+    private Sequence ignitionSeq;
 
     private void Awake()
     {
@@ -84,6 +85,10 @@ public class CampfireIgnitionController : MonoBehaviour
     {
         ResetVisuals();
 
+        // Kill any previous animation to avoid ghost tweens
+        ignitionSeq?.Kill();
+        ignitionSeq = null;
+
         // 0. Temporary disable interaction on campfire
         Interactable interactable = null;
         if (multiStepPuzzle != null)
@@ -95,7 +100,8 @@ public class CampfireIgnitionController : MonoBehaviour
             }
         }
 
-        Sequence seq = DOTween.Sequence();
+        ignitionSeq = DOTween.Sequence();
+        Sequence seq = ignitionSeq;
 
         // 1. Spawn Lens (moving & scaling in)
         if (lensRenderer != null && focusTarget != null)
@@ -253,6 +259,10 @@ public class CampfireIgnitionController : MonoBehaviour
         {
             Destroy(generatedSmokeSprite.texture);
         }
+
+        // Kill running tweens
+        ignitionSeq?.Kill();
+        ignitionSeq = null;
 
         // Cleanup listener
         if (multiStepPuzzle != null && multiStepPuzzle.steps != null)

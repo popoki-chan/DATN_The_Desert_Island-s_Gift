@@ -23,6 +23,16 @@ public class CraftingInteractable : MonoBehaviour
     public Sprite sharpRockSprite;
     public Sprite coirSprite;
 
+    [Header("View Main References")]
+    [Tooltip("Game object Coconut Visual ở view main để tắt đi sau khi nạo xong")]
+    public GameObject coconutVisualInMain;
+    [Tooltip("Game object Vun Dua ở view main để bật lên sau khi nạo xong")]
+    public GameObject vunDuaInMain;
+
+    [Header("Vun Dua Prefab")]
+    [Tooltip("Prefab vun_dua để spawn thêm trong quá trình nạo")]
+    public GameObject vunDuaPrefab;
+
     [Header("Debug")]
     public bool spawnAtCameraForTest = false;
 
@@ -40,6 +50,14 @@ public class CraftingInteractable : MonoBehaviour
         else
         {
             originalColor = Color.white;
+        }
+    }
+
+    void Start()
+    {
+        if (vunDuaInMain != null)
+        {
+            vunDuaInMain.SetActive(false);
         }
     }
 
@@ -236,6 +254,17 @@ public class CraftingInteractable : MonoBehaviour
                 coirVisual.transform.DOScale(Vector3.one, 0.4f).SetEase(Ease.OutQuad);
             }
 
+            // Sinh ra vun_dua prefab trong quá trình nạo dừa
+            if (vunDuaPrefab != null)
+            {
+                Vector3 vunDuaSpawnPos = spawnPos + new Vector3(Random.Range(-0.3f, 0.3f), Random.Range(-0.1f, 0.1f), 0f);
+                GameObject spawnedVunDua = Instantiate(vunDuaPrefab, vunDuaSpawnPos, Quaternion.identity, transform.parent);
+                if (spawnedVunDua != null)
+                {
+                    spawnedVunDua.SetActive(true);
+                }
+            }
+
             // Đồng thời scale xơ dừa thật to dần lên theo từng lần bào (3 lần tương ứng 33%, 66%, 100%)
             if (spawnedResult != null)
             {
@@ -281,14 +310,29 @@ public class CraftingInteractable : MonoBehaviour
             yield return fadeTween.WaitForCompletion();
         }
 
-        // 5. Cất quả dừa gốc đi (Biến mất)
-        gameObject.SetActive(false);
-
         // 6. Cho phép nhặt xơ dừa thật sau khi quả dừa biến mất và xơ dừa đạt đủ kích thước
         if (resultCol != null)
         {
             resultCol.enabled = true;
         }
+
+        // Tắt Coconut Visual ở view main và bật Vun Dua ở view main
+        if (coconutVisualInMain != null)
+        {
+            coconutVisualInMain.SetActive(false);
+        }
+        if (vunDuaInMain != null)
+        {
+            vunDuaInMain.SetActive(true);
+        }
+
+        // 5. Cất quả dừa gốc đi (Biến mất)
+        gameObject.SetActive(false);
+    }
+
+    void OnDestroy()
+    {
+        transform.DOKill();
     }
 
     void SpawnResult(Vector3 spawnPos)
