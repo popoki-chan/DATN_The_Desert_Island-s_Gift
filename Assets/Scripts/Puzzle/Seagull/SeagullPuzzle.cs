@@ -21,7 +21,7 @@ public class SeagullPuzzle : MonoBehaviour
     [Header("4. Sự kiện & Bong bóng")]
     public UnityEvent onEndingTriggered;
     public PopupBubble popupBubble;
-    public CutscenePlayer endingCutscenePlayer;
+    public TimelineCutsceneController endingCutscenePlayer;
 
     [Header("5. Visual Quả khi cắp")]
     public GameObject uncarvedFruitVisual;
@@ -172,6 +172,7 @@ public class SeagullPuzzle : MonoBehaviour
             {
                 endingCutscenePlayer.loadNextSceneOnComplete = true;
                 endingCutscenePlayer.nextSceneName = "MainMenu";
+                endingCutscenePlayer.gameObject.SetActive(true); // Kích hoạt GO trước khi phát
                 endingCutscenePlayer.PlayCutscene();
             }
         });

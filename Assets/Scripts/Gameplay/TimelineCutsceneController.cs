@@ -135,6 +135,19 @@ public class TimelineCutsceneController : MonoBehaviour
                 ViewManager.Instance.backButton.gameObject.SetActive(false);
         }
 
+        // ── Tắt nhạc nền với hiệu ứng fade-out ──────────────────
+        if (AudioManager.Instance != null && AudioManager.Instance.musicSource != null
+            && AudioManager.Instance.musicSource.isPlaying)
+        {
+            AudioSource musicSrc = AudioManager.Instance.musicSource;
+            float originalVolume = musicSrc.volume;
+            musicSrc.DOFade(0f, 1f).SetEase(Ease.InOutSine).OnComplete(() =>
+            {
+                musicSrc.Stop();
+                musicSrc.volume = originalVolume; // Khôi phục volume để dùng lại sau
+            });
+        }
+
         // ── Đăng ký sự kiện & phát Timeline ─────────────────────
         RegisterDirectorEvent();
 
