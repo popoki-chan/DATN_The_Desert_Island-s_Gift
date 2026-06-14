@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
+using DG.Tweening;
 
 [RequireComponent(typeof(Collider2D))] // Đảm bảo luôn có Collider để click trúng
 public class CraftingInteractable : MonoBehaviour
@@ -18,10 +19,39 @@ public class CraftingInteractable : MonoBehaviour
     [Tooltip("Âm thanh khi tương tác")]
     public AudioClip interactSFX;
 
+    [Header("Scraping Animation Sprites")]
+    public Sprite sharpRockSprite;
+    public Sprite coirSprite;
+
     [Header("Debug")]
     public bool spawnAtCameraForTest = false;
 
     private bool crafted = false;
+    private SpriteRenderer mySpriteRenderer;
+    private Color originalColor;
+
+    void Awake()
+    {
+        mySpriteRenderer = GetComponent<SpriteRenderer>();
+        if (mySpriteRenderer != null)
+        {
+            originalColor = mySpriteRenderer.color;
+        }
+        else
+        {
+            originalColor = Color.white;
+        }
+    }
+
+    void OnEnable()
+    {
+        if (mySpriteRenderer != null)
+        {
+            mySpriteRenderer.color = originalColor;
+        }
+        crafted = false;
+    }
+
 
     // --- BẮT SỰ KIỆN CLICK CHUỘT (PHẦN MỚI THÊM) ---
     void OnMouseDown()
@@ -95,38 +125,30 @@ public class CraftingInteractable : MonoBehaviour
             Inventory.Instance.ConsumeSelectedItem();
         }
 
-        // 2. Chạy âm thanh
-        if (interactSFX != null && Camera.main != null)
+        // 2. Tạo đối tượng sharp_rock ảo để chạy hoạt ảnh bào
+        GameObject rockVisual = null;
+        if (sharpRockSprite != null)
         {
-            AudioSource.PlayClipAtPoint(interactSFX, Camera.main.transform.position);
+            rockVisual = new GameObject("TempSharpRock", typeof(SpriteRenderer));
+            SpriteRenderer rockSR = rockVisual.GetComponent<SpriteRenderer>();
+            if (rockSR != null)
+            {
+                rockSR.sprite = sharpRockSprite;
+                rockSR.sortingOrder = 10; // Đặt lên trước coconut
+            }
         }
 
-        // 3. Hiệu ứng rung lắc (Vibe giải đố)
-        Vector3 startPos = transform.position;
-        float elapsed = 0f;
-        while (elapsed < processTime)
+        Vector3 coconutPos = transform.position;
+        Vector3 rockStartPos = coconutPos + new Vector3(0.5f, 0.4f, 0f);
+        Vector3 rockScrapePos = coconutPos + new Vector3(-0.2f, 0.1f, 0f);
+
+        if (rockVisual != null)
         {
-            transform.position = startPos + (Vector3)Random.insideUnitCircle * 0.05f;
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-        transform.position = startPos; // Trả về vị trí cũ cho chắc
-
-        // 4. Sinh ra vật phẩm mới
-        SpawnResult();
-
-        // 5. Cất vật thể gốc đi (Biến mất)
-        gameObject.SetActive(false);
-    }
-
-    void SpawnResult()
-    {
-        if (resultPrefab == null)
-        {
-            Debug.LogWarning("[Crafting] resultPrefab is null on " + gameObject.name);
-            return;
+            rockVisual.transform.position = rockStartPos;
+            rockVisual.transform.localScale = Vector3.one;
         }
 
+        // Xác định vị trí spawn và sinh ra vật phẩm thật trước dưới dạng vô hình / nhỏ nhất
         Vector3 spawnPos;
         if (spawnAtCameraForTest && Camera.main != null)
         {
@@ -135,8 +157,146 @@ public class CraftingInteractable : MonoBehaviour
         }
         else
         {
-            // Spawn tại chính vị trí object chứa script, với offset lên trên để tránh chồng lấp
-            spawnPos = transform.position + Vector3.up * 0.5f;
+            // Spawn tại mặt đất bên dưới quả dừa để các mảnh vụn rơi vào đúng chỗ
+            spawnPos = transform.position + new Vector3(0f, -0.7f, 0f);
+        }
+
+        GameObject spawnedResult = null;
+        Collider2D resultCol = null;
+        Vector3 targetScale = Vector3.one;
+
+        if (resultPrefab != null)
+        {
+            spawnedResult = Instantiate(resultPrefab, spawnPos, Quaternion.identity);
+            if (spawnedResult != null)
+            {
+                targetScale = resultPrefab.transform.localScale;
+                spawnedResult.transform.localScale = Vector3.zero;
+                resultCol = spawnedResult.GetComponent<Collider2D>();
+                if (resultCol != null)
+                {
+                    resultCol.enabled = false; // Tạm thời khóa nhặt trong lúc đang scale
+                }
+                spawnedResult.SetActive(true);
+            }
+        }
+
+        System.Collections.Generic.List<GameObject> tempCoirs = new System.Collections.Generic.List<GameObject>();
+
+        // Chạy hoạt ảnh bào và rơi xơ dừa 3 lần
+        for (int i = 0; i < 3; i++)
+        {
+            // Chạy âm thanh
+            if (interactSFX != null)
+            {
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlaySFX(interactSFX);
+                }
+                else if (Camera.main != null)
+                {
+                    AudioSource.PlayClipAtPoint(interactSFX, Camera.main.transform.position);
+                }
+            }
+
+            if (rockVisual != null)
+            {
+                // Hoạt ảnh sharp_rock di chuyển chà xát lên quả dừa
+                Tween rockTween = rockVisual.transform.DOMove(rockScrapePos, 0.25f).SetEase(Ease.OutQuad);
+                yield return rockTween.WaitForCompletion();
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.25f);
+            }
+
+            // Rung lắc quả dừa nhẹ khi bị chà xát
+            transform.DOComplete();
+            transform.DOShakePosition(0.15f, 0.05f, 10, 90, false, true);
+
+            // Sinh ra mảnh coir nhỏ rơi xuống
+            if (coirSprite != null)
+            {
+                GameObject coirVisual = new GameObject("TempCoirPiece", typeof(SpriteRenderer));
+                SpriteRenderer coirSR = coirVisual.GetComponent<SpriteRenderer>();
+                if (coirSR != null)
+                {
+                    coirSR.sprite = coirSprite;
+                    coirSR.sortingOrder = 9;
+                }
+                
+                // Vị trí ban đầu của mảnh coir ở trung tâm quả dừa, kích thước rất nhỏ
+                coirVisual.transform.position = coconutPos;
+                coirVisual.transform.localScale = Vector3.one * 0.1f;
+                tempCoirs.Add(coirVisual);
+
+                // Hoạt ảnh rơi xuống đất (rơi trúng đống xơ dừa thật đang lớn dần)
+                Vector3 landPos = spawnPos + new Vector3(Random.Range(-0.4f, 0.4f), 0f, 0f);
+                coirVisual.transform.DOMove(landPos, 0.4f).SetEase(Ease.OutBounce);
+                coirVisual.transform.DOScale(Vector3.one, 0.4f).SetEase(Ease.OutQuad);
+            }
+
+            // Đồng thời scale xơ dừa thật to dần lên theo từng lần bào (3 lần tương ứng 33%, 66%, 100%)
+            if (spawnedResult != null)
+            {
+                float scaleRatio = (i + 1) / 3f;
+                spawnedResult.transform.DOScale(targetScale * scaleRatio, 0.4f).SetEase(Ease.OutQuad);
+            }
+
+            if (rockVisual != null)
+            {
+                // Đưa sharp_rock về vị trí xuất phát để cạo lần tiếp theo
+                Tween rockTween = rockVisual.transform.DOMove(rockStartPos, 0.2f).SetEase(Ease.InQuad);
+                yield return rockTween.WaitForCompletion();
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.2f);
+            }
+        }
+
+        // Đợi thêm một nhịp ngắn trước khi dọn dẹp
+        yield return new WaitForSeconds(0.15f);
+
+        // 3. Hủy các đối tượng tạm (đồng thời kill các tween đang chạy trên đó để tránh lỗi DOTween)
+        if (rockVisual != null)
+        {
+            rockVisual.transform.DOKill();
+            Destroy(rockVisual);
+        }
+        foreach (var tc in tempCoirs)
+        {
+            if (tc != null)
+            {
+                tc.transform.DOKill();
+                Destroy(tc);
+            }
+        }
+
+        // 4. Chỉ có quả dừa mờ dần rồi biến mất (xơ dừa thật đã đạt kích thước đầy đủ và giữ nguyên)
+        SpriteRenderer coconutSR = GetComponent<SpriteRenderer>();
+        if (coconutSR != null)
+        {
+            Tween fadeTween = coconutSR.DOFade(0f, 0.5f).SetEase(Ease.OutQuad);
+            yield return fadeTween.WaitForCompletion();
+        }
+
+        // 5. Cất quả dừa gốc đi (Biến mất)
+        gameObject.SetActive(false);
+
+        // 6. Cho phép nhặt xơ dừa thật sau khi quả dừa biến mất và xơ dừa đạt đủ kích thước
+        if (resultCol != null)
+        {
+            resultCol.enabled = true;
+        }
+    }
+
+    void SpawnResult(Vector3 spawnPos)
+    {
+        if (resultPrefab == null)
+        {
+            Debug.LogWarning("[Crafting] resultPrefab is null on " + gameObject.name);
+            return;
         }
 
         GameObject spawned = Instantiate(resultPrefab, spawnPos, Quaternion.identity);
@@ -171,7 +331,8 @@ public class CraftingInteractable : MonoBehaviour
     {
         Debug.Log("[Crafting] Force spawn (bypass checks)");
         crafted = true;
-        SpawnResult();
+        Vector3 spawnPos = transform.position + Vector3.up * 0.5f;
+        SpawnResult(spawnPos);
         gameObject.SetActive(false);
     }
 

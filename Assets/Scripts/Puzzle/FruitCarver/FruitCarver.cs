@@ -47,6 +47,17 @@ public class FruitCarver : MonoBehaviour
     {
         isReadyToDraw = false;
         isDrawing = false;
+
+        if (PuzzleManager.Instance != null && PuzzleManager.Instance.GetState("fruit_carved"))
+        {
+            var img = GetComponent<RawImage>();
+            if (img != null) img.enabled = false;
+
+            var col = GetComponent<Collider2D>();
+            if (col != null) col.enabled = false;
+
+            if (handVisual != null) handVisual.gameObject.SetActive(false);
+        }
     }
 
     void Start()
@@ -57,6 +68,47 @@ public class FruitCarver : MonoBehaviour
         if (handVisual != null)
         {
             handVisual.localEulerAngles = new Vector3(0, 0, defaultHandRotation);
+        }
+
+        if (PuzzleManager.Instance != null && PuzzleManager.Instance.GetState("fruit_carved"))
+        {
+            var img = GetComponent<RawImage>();
+            if (img != null) img.enabled = false;
+
+            var col = GetComponent<Collider2D>();
+            if (col != null) col.enabled = false;
+
+            if (handVisual != null) handVisual.gameObject.SetActive(false);
+
+            GameObject human = GameObject.Find("Human Normal");
+            if (human == null)
+            {
+                var all = Resources.FindObjectsOfTypeAll<GameObject>();
+                foreach (var o in all)
+                {
+                    if (o.name == "Human Normal" && o.scene == gameObject.scene)
+                    {
+                        human = o;
+                        break;
+                    }
+                }
+            }
+            if (human != null)
+            {
+                var interact = human.GetComponent<Interactable>();
+                if (interact != null)
+                {
+                    interact.isZoomable = false;
+                    interact.targetView = null;
+                }
+                var popup = human.GetComponent<PopupBubble>();
+                if (popup != null)
+                {
+                    popup.Hide();
+                    popup.enabled = false;
+                }
+            }
+            return;
         }
 
         // Tự động lấy texture từ RawImage nếu originalFruitTexture chưa được kéo vào Inspector
@@ -89,6 +141,17 @@ public class FruitCarver : MonoBehaviour
     void Update()
     {
         if (SettingsPopupController.IsOpen) return;
+
+        // Nếu đã khắc dừa xong, click bất kỳ (không trúng UI) sẽ đóng view quay lại
+        if (PuzzleManager.Instance != null && PuzzleManager.Instance.GetState("fruit_carved"))
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (IsPointerOverUI()) return;
+                SubmitCarving();
+            }
+            return;
+        }
 
         UpdateHandVisualPosition();
 
@@ -246,12 +309,52 @@ public class FruitCarver : MonoBehaviour
         {
             if (Inventory.Instance != null && carvedFruitItem != null)
             {
-                Inventory.Instance.AddItem(carvedFruitItem);
+                bool alreadyCarved = PuzzleManager.Instance != null && PuzzleManager.Instance.GetState("fruit_carved");
+                if (!alreadyCarved && !Inventory.Instance.HasItem(carvedFruitItem.itemId))
+                {
+                    Inventory.Instance.AddItem(carvedFruitItem);
+                }
             }
         }
         catch (System.Exception e)
         {
             Debug.LogError("<color=red>[FruitCarver Lỗi]</color> Có vấn đề ở script Túi Đồ của bạn: " + e.Message);
+        }
+
+        // Đánh dấu đã khắc xong
+        if (PuzzleManager.Instance != null)
+        {
+            PuzzleManager.Instance.SetState("fruit_carved", true);
+        }
+
+        // Tìm Human Normal để tắt tính năng zoom và ẩn bong bóng popup
+        GameObject human = GameObject.Find("Human Normal");
+        if (human == null)
+        {
+            var all = Resources.FindObjectsOfTypeAll<GameObject>();
+            foreach (var o in all)
+            {
+                if (o.name == "Human Normal" && o.scene == gameObject.scene)
+                {
+                    human = o;
+                    break;
+                }
+            }
+        }
+        if (human != null)
+        {
+            var interact = human.GetComponent<Interactable>();
+            if (interact != null)
+            {
+                interact.isZoomable = false;
+                interact.targetView = null;
+            }
+            var popup = human.GetComponent<PopupBubble>();
+            if (popup != null)
+            {
+                popup.Hide();
+                popup.enabled = false;
+            }
         }
 
         // 2. Ẩn cái tay đi

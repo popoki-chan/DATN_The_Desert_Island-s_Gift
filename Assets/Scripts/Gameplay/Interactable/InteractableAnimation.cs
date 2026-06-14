@@ -45,6 +45,7 @@ public class InteractableAnimation : MonoBehaviour
 
     private Coroutine shakeCoroutine = null;
     private bool isRotated = false;
+    public bool IsRotated => isRotated;
     private bool toggleState = false;
 
     void Awake()

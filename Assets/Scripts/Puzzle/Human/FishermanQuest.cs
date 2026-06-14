@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [RequireComponent(typeof(Interactable))]
 public class FishermanQuest : MonoBehaviour
@@ -19,6 +19,14 @@ public class FishermanQuest : MonoBehaviour
     void Awake()
     {
         coreLogic = GetComponent<Interactable>();
+    }
+
+    void Start()
+    {
+        if (Inventory.Instance != null && Inventory.Instance.HasItem("fish"))
+        {
+            CompleteQuestAndLockPermanently();
+        }
     }
 
     public void StartFishingPhase()
@@ -84,6 +92,14 @@ public class FishermanQuest : MonoBehaviour
             // Hủy đăng ký tất cả các hàm tương tác để ông này hoàn toàn trơ ra
             coreLogic.OnDefaultInteract -= ReceiveSpearAndSwitchView;
             coreLogic.OnDefaultInteract -= ReEnterFishingView;
+        }
+
+        // Tắt bong bóng popup của Human
+        var popup = GetComponent<PopupBubble>();
+        if (popup != null)
+        {
+            popup.Hide();
+            popup.enabled = false;
         }
 
         Debug.Log("<color=red>[FishermanQuest]</color> CHỐT HẠ: Đã bắt được cá, Human bị khóa tương tác mãi mãi!");

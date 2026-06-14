@@ -28,7 +28,7 @@ public class PopupBubble : MonoBehaviour
     void OnDisable()
     {
         if (playOnDefaultInteract && interactable != null) interactable.OnDefaultInteract -= PlayAnimation;
-        if (currentSequence != null) currentSequence.Kill();
+        Hide();
     }
 
     public void PlayAnimation()

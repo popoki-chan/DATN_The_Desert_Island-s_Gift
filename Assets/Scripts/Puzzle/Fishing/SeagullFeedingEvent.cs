@@ -29,6 +29,8 @@ public class SeagullFeedingEvent : MonoBehaviour
     public GameObject mapPoopObject;
     public Transform poopDropPoint;
     public float poopFallDuration = 0.4f;
+    [Tooltip("Âm thanh poop chạm đất")]
+    public AudioClip poopSFX;
 
     private Interactable coreLogic;
     private SpriteRenderer seagullSpriteRenderer;
@@ -148,6 +150,10 @@ public class SeagullFeedingEvent : MonoBehaviour
                         .SetEase(Ease.InQuad)
                         .OnComplete(() => {
                             mapPoopObject.transform.DOPunchScale(new Vector3(0.4f, -0.2f, 0f), 0.2f, 1);
+                            if (poopSFX != null && AudioManager.Instance != null)
+                            {
+                                AudioManager.Instance.PlaySFX(poopSFX);
+                            }
                             Debug.Log("<color=brown>[Feeding]</color> Cứt đã hạ cánh. Lúc này hòn đá đã mất collider nên click vào cứt sẽ ăn ăn ăn ăn ngay!");
                         });
                 }

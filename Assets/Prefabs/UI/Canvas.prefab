@@ -3881,7 +3881,7 @@ PrefabInstance:
     - target: {fileID: -6027667849840824232, guid: 1fc4c1ae1ba5805469db493e70d00ff0, type: 3}
       propertyPath: clickSfx
       value: 
-      objectReference: {fileID: 8300000, guid: 8a280c63f16b49d4aa40eb5a7949c7cc, type: 3}
+      objectReference: {fileID: 8300000, guid: fb4e2297897d7d446bf01c56aa863557, type: 3}
     - target: {fileID: 50863052580331408, guid: 1fc4c1ae1ba5805469db493e70d00ff0, type: 3}
       propertyPath: m_PreserveAspect
       value: 1
@@ -3999,7 +3999,7 @@ PrefabInstance:
     - target: {fileID: -6027667849840824232, guid: 1fc4c1ae1ba5805469db493e70d00ff0, type: 3}
       propertyPath: clickSfx
       value: 
-      objectReference: {fileID: 8300000, guid: 8a280c63f16b49d4aa40eb5a7949c7cc, type: 3}
+      objectReference: {fileID: 8300000, guid: fb4e2297897d7d446bf01c56aa863557, type: 3}
     - target: {fileID: 50863052580331408, guid: 1fc4c1ae1ba5805469db493e70d00ff0, type: 3}
       propertyPath: m_PreserveAspect
       value: 1
@@ -4121,7 +4121,7 @@ PrefabInstance:
     - target: {fileID: -6027667849840824232, guid: 1fc4c1ae1ba5805469db493e70d00ff0, type: 3}
       propertyPath: clickSfx
       value: 
-      objectReference: {fileID: 8300000, guid: 8a280c63f16b49d4aa40eb5a7949c7cc, type: 3}
+      objectReference: {fileID: 8300000, guid: fb4e2297897d7d446bf01c56aa863557, type: 3}
     - target: {fileID: 50863052580331408, guid: 1fc4c1ae1ba5805469db493e70d00ff0, type: 3}
       propertyPath: m_PreserveAspect
       value: 1
@@ -4235,7 +4235,7 @@ PrefabInstance:
     - target: {fileID: -6027667849840824232, guid: 1fc4c1ae1ba5805469db493e70d00ff0, type: 3}
       propertyPath: clickSfx
       value: 
-      objectReference: {fileID: 8300000, guid: 8a280c63f16b49d4aa40eb5a7949c7cc, type: 3}
+      objectReference: {fileID: 8300000, guid: fb4e2297897d7d446bf01c56aa863557, type: 3}
     - target: {fileID: 50863052580331408, guid: 1fc4c1ae1ba5805469db493e70d00ff0, type: 3}
       propertyPath: m_PreserveAspect
       value: 1
@@ -4353,7 +4353,7 @@ PrefabInstance:
     - target: {fileID: -6027667849840824232, guid: 1fc4c1ae1ba5805469db493e70d00ff0, type: 3}
       propertyPath: clickSfx
       value: 
-      objectReference: {fileID: 8300000, guid: 8a280c63f16b49d4aa40eb5a7949c7cc, type: 3}
+      objectReference: {fileID: 8300000, guid: fb4e2297897d7d446bf01c56aa863557, type: 3}
     - target: {fileID: 50863052580331408, guid: 1fc4c1ae1ba5805469db493e70d00ff0, type: 3}
       propertyPath: m_PreserveAspect
       value: 1
@@ -4491,7 +4491,7 @@ PrefabInstance:
     - target: {fileID: -6027667849840824232, guid: 1fc4c1ae1ba5805469db493e70d00ff0, type: 3}
       propertyPath: clickSfx
       value: 
-      objectReference: {fileID: 8300000, guid: 8a280c63f16b49d4aa40eb5a7949c7cc, type: 3}
+      objectReference: {fileID: 8300000, guid: fb4e2297897d7d446bf01c56aa863557, type: 3}
     - target: {fileID: 50863052580331408, guid: 1fc4c1ae1ba5805469db493e70d00ff0, type: 3}
       propertyPath: m_PreserveAspect
       value: 1

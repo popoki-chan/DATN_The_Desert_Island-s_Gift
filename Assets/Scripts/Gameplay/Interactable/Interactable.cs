@@ -66,6 +66,17 @@ public class Interactable : MonoBehaviour
                 bool success = Inventory.Instance.TryUseOn(sel, this);
                 if (!success)
                 {
+                    if (sel == null)
+                    {
+                        // Khi click tay không vào vật thể bị khóa, phát âm thanh click bình thường để nhận biết phản hồi
+                        AudioClip clipToPlay = onClickSfx != null ? onClickSfx : failUseSfx;
+                        if (clipToPlay != null)
+                        {
+                            AudioManager.Instance?.PlaySFX(clipToPlay);
+                        }
+                    }
+                    // Nếu dùng sai vật phẩm (sel != null), Inventory.TryUseOn đã tự phát failUseSfx nên ta không phát thêm ở đây
+
                     if (TryGetComponent<PopupBubble>(out var bubble))
                     {
                         bubble.PlayAnimation();

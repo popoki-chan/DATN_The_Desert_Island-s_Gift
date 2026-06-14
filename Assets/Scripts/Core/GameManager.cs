@@ -18,6 +18,9 @@ public class GameManager : Singleton<GameManager>
         if (Instance == this)
         {
             EnsureReferences();
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = 100;
+            Debug.Log("[GameManager] Locked game FPS to 100.");
         }
     }
 

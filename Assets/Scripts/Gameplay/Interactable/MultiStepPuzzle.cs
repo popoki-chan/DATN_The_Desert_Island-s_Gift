@@ -44,6 +44,54 @@ public class MultiStepPuzzle : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        if (PuzzleManager.Instance != null && PuzzleManager.Instance.GetState("fruit_carved"))
+        {
+            bool isFruitCarvingPuzzle = false;
+            if (steps != null)
+            {
+                foreach (var step in steps)
+                {
+                    if (step.requiredItemId == "strange_fruit")
+                    {
+                        isFruitCarvingPuzzle = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isFruitCarvingPuzzle)
+            {
+                coreLogic.isLocked = false;
+                coreLogic.requiredItemId = "";
+                coreLogic.isZoomable = false;
+                coreLogic.targetView = null;
+
+                var popup = GetComponent<PopupBubble>();
+                if (popup != null)
+                {
+                    popup.Hide();
+                    popup.enabled = false;
+                }
+
+                if (steps != null)
+                {
+                    foreach (var step in steps)
+                    {
+                        if (step.visualNow != null) step.visualNow.SetActive(true);
+                        if (step.visualOther != null) step.visualOther.SetActive(true);
+                        if (step.hideVisualNow != null) step.hideVisualNow.SetActive(false);
+                        if (step.hideVisualOther != null) step.hideVisualOther.SetActive(false);
+                    }
+                }
+
+                this.enabled = false;
+                Debug.Log("<color=green>[MultiStepPuzzle]</color> Restored solved state for fruit carving puzzle.");
+            }
+        }
+    }
+
     void OnEnable()
     {
         if (coreLogic != null) coreLogic.OnDefaultInteract += HandleStep;

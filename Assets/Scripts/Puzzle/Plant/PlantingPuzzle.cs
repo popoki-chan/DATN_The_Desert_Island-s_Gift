@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using DG.Tweening;
 
 [RequireComponent(typeof(Interactable), typeof(SpriteRenderer))]
@@ -47,6 +48,10 @@ public class PlantingPuzzle : MonoBehaviour
     public UnityEngine.Events.UnityEvent onPlantingCompleted;
     public CutscenePlayer cutscenePlayer;
 
+    [Header("7. Hiệu ứng tưới nước")]
+    public GameObject sceneWaterDrop;
+    public AudioClip waterSFX;
+
     private Interactable interactable;
     private int puzzleStep = 0; // 0: Cát phẳng, 1: Ụ đất, 2: Hạt nằm trên đất, 3: Chờ mọc mầm 2
 
@@ -67,6 +72,39 @@ public class PlantingPuzzle : MonoBehaviour
         if (mapPlacedSeedVisual != null) mapPlacedSeedVisual.SetActive(false);
         if (mapSeedlingVisual != null) mapSeedlingVisual.SetActive(false);
         if (mapSeedlingLv2Visual != null) mapSeedlingLv2Visual.SetActive(false);
+
+        if (sceneWaterDrop == null)
+        {
+            sceneWaterDrop = GameObject.Find("/Enviroment/View Plant/water_drop");
+            if (sceneWaterDrop == null)
+            {
+                var all = GameObject.FindObjectsOfType<GameObject>(true);
+                foreach (var o in all)
+                {
+                    if (o.name == "water_drop" && o.scene == gameObject.scene)
+                    {
+                        sceneWaterDrop = o;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (sceneWaterDrop != null)
+        {
+            sceneWaterDrop.SetActive(false); // Đảm bảo ẩn lúc đầu
+        }
+
+        if (waterSFX == null)
+        {
+            waterSFX = Resources.Load<AudioClip>("Sounds/SFX/sfx_water1");
+#if UNITY_EDITOR
+            if (waterSFX == null)
+            {
+                waterSFX = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Sounds/SFX/sfx_water1.MP3");
+            }
+#endif
+        }
 
         interactable.requiredItemId = digToolId;
         interactable.isLocked = true;
@@ -151,17 +189,7 @@ public class PlantingPuzzle : MonoBehaviour
         // --- BƯỚC 3: TƯỚI NƯỚC (NẢY MẦM 1) ---
         else if (puzzleStep == 2)
         {
-            if (placedSeedVisual != null) placedSeedVisual.SetActive(false);
-            if (mapPlacedSeedVisual != null) mapPlacedSeedVisual.SetActive(false);
-
-            if (seedlingVisual != null) seedlingVisual.SetActive(true);
-            if (mapSeedlingVisual != null) mapSeedlingVisual.SetActive(true);
-
-            Debug.Log("<color=cyan>[Planting]</color> Đã tưới nước! Cây đã nảy mầm cấp 1!");
-            interactable.requiredItemId = "";
-            interactable.isLocked = false;
-            interactable.description = "Mầm cây con đã mọc lên. Hãy thử chạm vào nó xem sao...";
-            puzzleStep = 3;
+            StartCoroutine(ProcessWatering());
         }
 
         // --- BƯỚC 4: CLICK MẦM 1 -> MỌC MẦM 2 ---
@@ -184,6 +212,70 @@ public class PlantingPuzzle : MonoBehaviour
                 cutscenePlayer.PlayCutscene();
             }
         }
+    }
+
+    private IEnumerator ProcessWatering()
+    {
+        interactable.isLocked = true; // Khóa tương tác trong lúc chạy hoạt ảnh
+
+        // 1. Chạy âm thanh tưới nước
+        if (waterSFX != null)
+        {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX(waterSFX);
+            }
+            else if (Camera.main != null)
+            {
+                AudioSource.PlayClipAtPoint(waterSFX, Camera.main.transform.position);
+            }
+        }
+
+        // 2. Kích hoạt GameObject water_drop của người dùng trong scene
+        if (sceneWaterDrop != null)
+        {
+            sceneWaterDrop.SetActive(true);
+
+            // Thêm hiệu ứng di chuyển rơi xuống nhẹ và mờ dần cho đẹp mắt
+            var sr = sceneWaterDrop.GetComponent<SpriteRenderer>();
+            Vector3 originalPos = sceneWaterDrop.transform.localPosition;
+            Color originalColor = sr != null ? sr.color : Color.white;
+
+            if (sr != null)
+            {
+                // Rơi xuống nhẹ và mờ dần sang 0 trong 0.6 giây
+                sceneWaterDrop.transform.DOLocalMoveY(originalPos.y - 0.5f, 0.6f).SetEase(Ease.InQuad);
+                sr.DOFade(0f, 0.6f).SetEase(Ease.InQuad);
+            }
+
+            yield return new WaitForSeconds(0.6f);
+
+            // Tắt đi và hồi phục lại vị trí/màu sắc ban đầu để sẵn sàng dùng lại nếu cần
+            sceneWaterDrop.transform.DOKill();
+            if (sr != null) sr.transform.DOKill();
+            sceneWaterDrop.SetActive(false);
+
+            sceneWaterDrop.transform.localPosition = originalPos;
+            if (sr != null) sr.color = originalColor;
+        }
+        else
+        {
+            // Trì hoãn nếu không tìm thấy object
+            yield return new WaitForSeconds(0.6f);
+        }
+
+        // 3. Hiện mầm cây con
+        if (placedSeedVisual != null) placedSeedVisual.SetActive(false);
+        if (mapPlacedSeedVisual != null) mapPlacedSeedVisual.SetActive(false);
+
+        if (seedlingVisual != null) seedlingVisual.SetActive(true);
+        if (mapSeedlingVisual != null) mapSeedlingVisual.SetActive(true);
+
+        Debug.Log("<color=cyan>[Planting]</color> Đã tưới nước hoàn tất! Cây đã nảy mầm cấp 1!");
+        interactable.requiredItemId = "";
+        interactable.isLocked = false;
+        interactable.description = "Mầm cây con đã mọc lên. Hãy thử chạm vào nó xem sao...";
+        puzzleStep = 3;
     }
 
     void OnDisable()

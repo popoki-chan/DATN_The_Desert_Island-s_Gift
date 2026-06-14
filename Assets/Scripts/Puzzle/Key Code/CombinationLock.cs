@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class CombinationLock : MonoBehaviour
 {
@@ -24,6 +24,9 @@ public class CombinationLock : MonoBehaviour
     [Header("View Bên Trong Rương")]
     public GameObject viewInChest;
 
+    [Header("Âm thanh")]
+    public AudioClip unlockSFX;
+
     private bool isUnlocked = false;
 
     public void CheckCode()
@@ -44,6 +47,18 @@ public class CombinationLock : MonoBehaviour
     private void Unlock()
     {
         isUnlocked = true;
+
+        if (unlockSFX != null)
+        {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX(unlockSFX);
+            }
+            else if (Camera.main != null)
+            {
+                AudioSource.PlayClipAtPoint(unlockSFX, Camera.main.transform.position);
+            }
+        }
         if (chestClosedVisual != null) chestClosedVisual.SetActive(false);
         if (chestOpenVisual != null) chestOpenVisual.SetActive(true);
 
